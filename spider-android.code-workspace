@@ -91,6 +91,17 @@
 				"database": "test",
 				"username": "root",
 				"password": ""
+			},
+			{
+				"previewLimit": 50,
+				"server": "124.220.6.43",
+				"port": 5432,
+				"driver": "PostgreSQL",
+				"name": "posgresql",
+				"group": "124.22.6.43",
+				"database": "postgres",
+				"username": "admin",
+				"password": "root123456"
 			}
 		]
 	}

@@ -18,7 +18,8 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 
 # intent.setAction("android.intent.action.VIEW");
 # intent.setData(android.net.Uri.parse("tg://resolve?phone=" + phoneNumber));
-import threading
+import pickle
+import time
 from pathlib import Path
 
 import redis
@@ -28,9 +29,6 @@ from lamda.const import *
 from tools.ocr import extract_varifycation
 
 redis_client = redis.from_url("redis://:root123456@192.168.9.37:6379/0")
-
-
-import time
 
 
 def get_varifycation_from_remote():
@@ -490,7 +488,7 @@ def get_varifycation(phone, img_path: Path):
     screent_shot_varify(img_path=img_path)
     res = extract_varifycation(img_path)
     print(res["varify"], res["web_varify"], res["raw"])
-    redis_client.setex(phone, 60, res)
+    redis_client.setex(phone, 60, value=pickle.dumps(res))
     return res
 
 
