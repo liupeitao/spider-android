@@ -19,10 +19,12 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 # intent.setAction("android.intent.action.VIEW");
 # intent.setData(android.net.Uri.parse("tg://resolve?phone=" + phoneNumber));
 import pickle
+import re
 import time
 from pathlib import Path
 
 import redis
+import requests
 from lamda.client import Device, GrantType, Point
 from lamda.const import *
 
@@ -32,7 +34,9 @@ redis_client = redis.from_url("redis://:root123456@192.168.9.37:6379/0")
 
 
 def get_varifycation_from_remote():
-    return "34234"
+    return requests.get(
+        "http://192.168.9.25:8011/code", params={"phone_number": "18112953195"}
+    )
 
 
 d = Device("192.168.9.6")
@@ -492,5 +496,7 @@ def get_varifycation(phone, img_path: Path):
     return res
 
 
-login("13349150213")
+login("13349150214")
+r = get_varifycation_from_remote().json()
+print(r)
 # get_last_varifycation("8613349150214",img_path=Path("varify.png"))
