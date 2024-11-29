@@ -75,7 +75,7 @@
 			"**/.conda/**": true,
 			"**/l/**": true,
 		},
-		"ansible.python.interpreterPath": "/home/liupeitao/projects/spider/.venv/bin/python",
+		"ansible.python.interpreterPath": "/home/liupeitao/projects/spider-android/.venv/bin/python",
 		"sqltools.connections": [
 			{
 				"mysqlOptions": {

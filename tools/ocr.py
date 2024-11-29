@@ -2,6 +2,15 @@
 Author: liupeitao sudolovelnpctly6869@outlook.com
 Date: 2024-11-26 17:43:56
 LastEditors: liupeitao sudolovelnpctly6869@outlook.com
+LastEditTime: 2024-11-29 12:53:17
+FilePath: /spider-android/tools/ocr.py
+Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+"""
+
+"""
+Author: liupeitao sudolovelnpctly6869@outlook.com
+Date: 2024-11-26 17:43:56
+LastEditors: liupeitao sudolovelnpctly6869@outlook.com
 LastEditTime: 2024-11-28 11:47:09
 FilePath: /spider-android/tools/ocr.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -66,6 +75,6 @@ def extract_varifycation(img: Path):
     }
 
 
-image_path = Path("/home/liupeitao/projects/lamda/partial.png")
-res = extract_varifycation(img=image_path)
-print(res["varify"], res["web_varify"])
+# image_path = Path("/home/liupeitao/projects/lamda/partial.png")
+# res = extract_varifycation(img=image_path)
+# print(res["varify"], res["web_varify"])
