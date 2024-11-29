@@ -36,8 +36,10 @@ class LoginThread(QThread):
                 f"Phone: {self.phone} , date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
             )
             d.start_activity(**{"component": "org.thunderdog.challegram/.MainActivity"})
-
-            self.log_signal.emit("检测上次登录状态")
+            self.log_signal.emit("重置TGx...")
+            app.reset_data()
+            self.log_signal.emit("赋予权限， 大约等待10-20s...")
+            self.grant_app(app)
             if d(text="Please enter your valid email address.").exists():
                 self.log_signal.emit("检测到上次登录失败，重置TgX数据， 大约需要15s")
                 app.reset_data()
@@ -90,16 +92,16 @@ class LoginThread(QThread):
             time.sleep(6)
             code_input = d(className="android.widget.EditText")
             time.sleep(2)
-            if not d(textContains="We've sent an SMS with an").exists():
+            if not d(textContains="sent").exists():
                 ret_text = ""
-                if d(textContains="to").exists():
-                    ret_text = d(textContains="to").get_text()
-                if d(textContains="your").exists():
-                    ret_text = d(textContains="your").get_text()
                 if d(textContains="oo").exists():
                     ret_text = d(textContains="oo many request").get_text()
-                if d(textContains="Invalid").exists():
+                elif d(textContains="Invalid").exists():
                     ret_text = d(textContains="Invalid").get_text()
+                elif d(textContains="to").exists():
+                    ret_text = d(textContains="to").get_text()
+                elif d(textContains="your").exists():
+                    ret_text = d(textContains="your").get_text()
                 self.log_signal.emit(f"失败。 检测到不是输入验证码页面 原因:{ret_text}")
                 self.log_signal.emit("即将退出")
                 return
@@ -115,7 +117,7 @@ class LoginThread(QThread):
                 else:
                     d(text="ALLOW").click()
                     break
-            self.log_signal.emit("失败次数过多，即将退出")
+            self.log_signal.emit("登录成功")
             return
         except Exception as e:
             self.log_signal.emit(f"异常: {str(e)}")
