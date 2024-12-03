@@ -1,8 +1,12 @@
 import datetime
+import pickle
 import sys
 import time
+from pathlib import Path
 
-from lamda.client import Device, GrantType
+import redis
+import requests
+from lamda.client import Device, GrantType, Point
 from lamda.const import *
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtWidgets import (
@@ -15,6 +19,17 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from tools.ocr import extract_varifycation
+
+redis_client = redis.from_url("redis://:root123456@192.168.9.37:6379/0")
+
+
+def get_varifycation_from_remote():
+    return requests.get(
+        "http://192.168.9.25:8011/code", params={"phone_number": "18112953195"}
+    )
+
 
 d = Device("192.168.9.6")
 
@@ -105,8 +120,6 @@ class LoginThread(QThread):
                 self.log_signal.emit(f"失败。 检测到不是输入验证码页面 原因:{ret_text}")
                 self.log_signal.emit("即将退出")
                 return
-            reer = d(textContains="sent").get_text()
-            self.log_signal.emit(f"{reer}")
             for i in range(3):
                 self.code_signal.emit()
                 code = self.wait_for_code()
@@ -129,6 +142,7 @@ class LoginThread(QThread):
     def grant_app(self, app):
         permissions = [
             "android.permission.CAMERA",
+            "android.permission.FLASHLIGHT",
             "android.permission.INTERNET",
             "android.permission.READ_CONTACTS",
             "android.permission.POST_NOTIFICATIONS",
@@ -191,8 +205,58 @@ class App(QWidget):
             self.login_thread.set_code(code)
 
 
+def open_tg_chat(phone="42777"):
+    d.start_activity(action="android.intent.action.VIEW", data=f"https://t.me/+{phone}")
+    time.sleep(2)
+    d.click(Point(x=690, y=448))
+
+
+def scroll_to_bottom(reverse=False):
+    for i in range(3):
+        A = Point(x=300, y=200)
+        B = Point(x=300, y=1000)
+        if reverse:
+            d.swipe(A, B)
+        d.swipe(B, A)
+        if f := d(resourceId="org.thunderdog.challegram:id/btn_scroll"):
+            try:
+                f.click()
+                break
+            except Exception:
+                continue
+
+
+def get_last_varifycation(img_path: Path):
+    ff = d(className="android.view.View")
+    eles = [
+        x
+        for x in ff.info_of_all_instances()
+        if x.visibleBounds.left == 0
+        and x.visibleBounds.right == 720
+        and x.visibleBounds.bottom - x.visibleBounds.top > 500
+        and x.visibleBounds.bottom - x.visibleBounds.top < 1000
+    ]
+    d.screenshot(quality=60, bound=eles[0].bounds).save(img_path)
+
+
+def screent_shot_varify(img_path: Path):
+    open_tg_chat()
+    scroll_to_bottom()
+    get_last_varifycation(img_path=img_path)
+
+
+def get_varifycation(phone, img_path: Path):
+    screent_shot_varify(img_path=img_path)
+    res = extract_varifycation(img_path)
+    redis_client.setex(phone, 60, value=pickle.dumps(res))
+    res.pop("img")
+    print(res)
+    return res
+
+
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    ex = App()
-    ex.show()
-    sys.exit(app.exec_())
+    # app = QApplication(sys.argv)
+    # ex = App()
+    # ex.show()
+    # sys.exit(app.exec_())
+    get_varifycation("13232", Path("a.png"))

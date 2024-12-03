@@ -491,12 +491,10 @@ def screent_shot_varify(img_path: Path):
 def get_varifycation(phone, img_path: Path):
     screent_shot_varify(img_path=img_path)
     res = extract_varifycation(img_path)
-    print(res["varify"], res["web_varify"], res["raw"])
     redis_client.setex(phone, 60, value=pickle.dumps(res))
+    res.pop("img")
+    print(res)
     return res
 
 
-login("13349150214")
-r = get_varifycation_from_remote().json()
-print(r)
-# get_last_varifycation("8613349150214",img_path=Path("varify.png"))
+get_varifycation("312312", Path("a.png"))
