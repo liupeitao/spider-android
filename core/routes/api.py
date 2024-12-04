@@ -9,7 +9,7 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 from fastapi import APIRouter
 
 
-from routes import (
+from core.routes import (
     letstalk,
     tg
 )

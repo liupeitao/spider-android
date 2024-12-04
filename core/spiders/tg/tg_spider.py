@@ -28,10 +28,10 @@ import requests
 from lamda.client import Device, GrantType, Point
 from lamda.const import *
 
-from db.models import App
-from tools.ocr import extract_varifycation
+from core.db.models import App
+from core.tools.ocr import extract_varifycation
 
-from android.spider import Spider
+from core.spider import Spider
 
 redis_client = redis.from_url("redis://:root123456@192.168.9.37:6379/0",  decode_responses=True)
 

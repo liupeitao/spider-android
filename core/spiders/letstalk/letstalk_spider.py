@@ -1,11 +1,10 @@
-import re
 import time
 from typing import Optional
 
 from lamda.client import Device, Keys, Point
 from pydantic import BaseModel, Field
 
-from db.models import App
+from core.db.models import App
 
 
 def let_talk_search():

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, BackgroundTasks
 
-from db.models import App
-from android.letstalk.letstalk_spider import LetTalk_Spider
+from core.db.models import App
+from core.spiders.letstalk.letstalk_spider import LetTalk_Spider
 router = APIRouter()
 
 

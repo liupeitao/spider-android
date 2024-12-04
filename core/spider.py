@@ -2,7 +2,7 @@
 Author: liupeitao sudolovelnpctly6869@outlook.com
 Date: 2024-12-04 09:38:12
 LastEditors: liupeitao sudolovelnpctly6869@outlook.com
-LastEditTime: 2024-12-04 10:01:46
+LastEditTime: 2024-12-04 15:47:47
 FilePath: /spider-android/android/spider.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -16,8 +16,8 @@ from pathlib import Path
 from typing import Any, Optional, Self
 
 from const import CRAWLER_DEFINE
-from db.models import App, BaseInfoModel, CrawlerInfoModel
-from deps.ref import object_ref
+from core.db.models import App, BaseInfoModel, CrawlerInfoModel
+from core.deps.ref import object_ref
 def transform_phone_to_port(phone):
     return phone
 

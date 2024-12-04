@@ -6,7 +6,7 @@ from config.settings import BaseConfig
 from fastapi import FastAPI
 from loguru import logger
 
-from db.events import (
+from core.db.events import (
     close_mongo_connection,
     close_pg_connection,
     connect_to_mongo,

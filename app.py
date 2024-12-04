@@ -1,14 +1,22 @@
+'''
+Author: liupeitao sudolovelnpctly6869@outlook.com
+Date: 2024-11-26 17:43:56
+LastEditors: liupeitao sudolovelnpctly6869@outlook.com
+LastEditTime: 2024-12-04 15:47:35
+FilePath: /spider-android/app.py
+Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+'''
 from contextlib import asynccontextmanager
 
 import uvicorn
 from config import config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from tools.helper import banner
-from tools.logger import creat_customize_log_loguru
+from core.tools.helper import banner
+from core.tools.logger import creat_customize_log_loguru
 
 from events import create_start_app_handler, create_stop_app_handler
-from routes.api import router as api_router
+from core.routes.api import router as api_router
 
 
 @asynccontextmanager
