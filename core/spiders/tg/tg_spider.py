@@ -16,7 +16,6 @@ import time
 import redis
 import requests
 from lamda.client import GrantType, Point
-from lamda.const import *
 
 from core.androidspider import AndroidSpider
 from core.db.models import App, DeviceModel

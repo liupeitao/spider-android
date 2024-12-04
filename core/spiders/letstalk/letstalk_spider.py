@@ -1,17 +1,11 @@
 import time
 from typing import Optional
 
-from lamda.client import Device, Keys, Point
+from lamda.client import Keys, Point
 from pydantic import BaseModel, Field
 
-from core.db.models import App
-
-
-def let_talk_search():
-    time.sleep(1)
-
-
-let_talk_search()
+from core.androidspider import AndroidSpider
+from core.db.models import App, DeviceModel
 
 
 class PhoneNumber(BaseModel):
@@ -20,19 +14,12 @@ class PhoneNumber(BaseModel):
 
 NAME = "LetsTalk"
 
-INTER_URL_PATTERN = "api.m.jd.com/api"
 
-
-def get_device():
-    d = Device("192.168.9.6")
-    return d
-
-
-class LetTalk_Spider:
-    def __init__(self, item: App):
-        self.d = get_device()
-        print(item)
-        pass
+class LetTalk_Spider(AndroidSpider):
+    def __init__(
+        self, item: App = App(app="LetsTalk"), device: Optional[DeviceModel] = DeviceModel(ip="192.168.9.6", dtype="android")
+    ):
+        super().__init__(item, device)
 
     def crawl_chat(self, friend: Optional[str] = None):
         self.d.start_activity(
