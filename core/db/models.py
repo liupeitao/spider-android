@@ -2,6 +2,7 @@ import datetime
 from enum import Enum
 from typing import Any, Callable, Optional
 from uuid import UUID
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -137,3 +138,11 @@ class Verify(BaseModel):
     countrycode: str
     phone: str
     varify: str
+
+    
+
+DeviceType = Literal['android', 'ios', 'web']
+class DeviceModel(BaseModel):
+    dtype: DeviceType
+    ip: str
+    port: Optional[int] = None
