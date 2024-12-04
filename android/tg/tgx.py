@@ -19,16 +19,17 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 # intent.setAction("android.intent.action.VIEW");
 # intent.setData(android.net.Uri.parse("tg://resolve?phone=" + phoneNumber));
 import pickle
-import re
 import time
 from pathlib import Path
 
 import redis
+import datetime
 import requests
 from lamda.client import Device, GrantType, Point
 from lamda.const import *
 
 from tools.ocr import extract_varifycation
+from db.models import Verify
 
 redis_client = redis.from_url("redis://:root123456@192.168.9.37:6379/0")
 
@@ -42,410 +43,119 @@ def get_varifycation_from_remote():
 d = Device("192.168.9.6")
 
 
-# 授予 READ_PHONE_STATE 权限
-def grant_app(app):
-    try:
-        app.grant("android.permission.CAMERA", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
+def grant_app(self, app):
+    permissions = [
+        "android.permission.CAMERA",
+        "android.permission.FLASHLIGHT",
+        "android.permission.INTERNET",
+        "android.permission.READ_CONTACTS",
+        "android.permission.POST_NOTIFICATIONS",
+    ]
+    for permission in permissions:
+        try:
+            app.grant(permission, mode=GrantType.GRANT_ALLOW)
+        except Exception:
+            pass
 
-    try:
-        app.grant("android.permission.FLASHLIGHT", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
 
-    try:
-        app.grant("android.permission.INTERNET", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
+def wait_for_code():
+    return redis_client.get(f"""{"Telegram"}:code:{verify.get("countrycode")+verify.get("phone")}""",)
 
+def run(phone):
     try:
-        app.grant("android.permission.ACCESS_NETWORK_STATE", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.ACCESS_FINE_LOCATION", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "android.permission.ACCESS_COARSE_LOCATION", mode=GrantType.GRANT_ALLOW
+        app = d.application("org.thunderdog.challegram")
+        print("===== TgX Login ======")
+        print("启动TgX")
+        print(
+            f"Phone: {phone} , date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "android.permission.ACCESS_BACKGROUND_LOCATION", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "android.permission.READ_EXTERNAL_STORAGE", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "android.permission.WRITE_EXTERNAL_STORAGE", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.RECORD_AUDIO", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "android.permission.MODIFY_AUDIO_SETTINGS", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.WAKE_LOCK", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.VIBRATE", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.READ_CONTACTS", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.USE_FINGERPRINT", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.FOREGROUND_SERVICE", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "android.permission.FOREGROUND_SERVICE_LOCATION", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
-            mode=GrantType.GRANT_ALLOW,
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "android.permission.FOREGROUND_SERVICE_PHONE_CALL",
-            mode=GrantType.GRANT_ALLOW,
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.MANAGE_OWN_CALLS", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.CHANGE_CONFIGURATION", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.READ_PHONE_STATE", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "android.permission.RECEIVE_BOOT_COMPLETED", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.SYSTEM_ALERT_WINDOW", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.WRITE_SETTINGS", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.BLUETOOTH", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "android.permission.REQUEST_INSTALL_PACKAGES", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.POST_NOTIFICATIONS", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.READ_MEDIA_IMAGES", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.READ_MEDIA_VIDEO", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.READ_MEDIA_AUDIO", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.google.android.providers.gsf.permission.READ_GSERVICES",
-            mode=GrantType.GRANT_ALLOW,
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.google.android.c2dm.permission.RECEIVE", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "org.thunderdog.challegram.permission.MAPS_RECEIVE",
-            mode=GrantType.GRANT_ALLOW,
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "org.thunderdog.challegram.permission.C2D_MESSAGE",
-            mode=GrantType.GRANT_ALLOW,
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.sec.android.provider.badge.permission.READ", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.sec.android.provider.badge.permission.WRITE",
-            mode=GrantType.GRANT_ALLOW,
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.htc.launcher.permission.READ_SETTINGS", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.htc.launcher.permission.UPDATE_SHORTCUT", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.sonyericsson.home.permission.BROADCAST_BADGE",
-            mode=GrantType.GRANT_ALLOW,
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.sonymobile.home.permission.PROVIDER_INSERT_BADGE",
-            mode=GrantType.GRANT_ALLOW,
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.anddoes.launcher.permission.UPDATE_COUNT", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.majeur.launcher.permission.UPDATE_BADGE", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.huawei.android.launcher.permission.CHANGE_BADGE",
-            mode=GrantType.GRANT_ALLOW,
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.huawei.android.launcher.permission.READ_SETTINGS",
-            mode=GrantType.GRANT_ALLOW,
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.huawei.android.launcher.permission.WRITE_SETTINGS",
-            mode=GrantType.GRANT_ALLOW,
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.READ_APP_BADGE", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.oppo.launcher.permission.READ_SETTINGS", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "com.oppo.launcher.permission.WRITE_SETTINGS", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.READ_SYNC_SETTINGS", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.WRITE_SYNC_SETTINGS", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant("android.permission.GET_ACCOUNTS", mode=GrantType.GRANT_ALLOW)
-    except Exception:
-        pass
-
-    try:
-        app.grant(
-            "android.permission.AUTHENTICATE_ACCOUNTS", mode=GrantType.GRANT_ALLOW
-        )
-    except Exception:
-        pass
-
-
-def login(phone):
-    app = d.application("org.thunderdog.challegram")
-    d.start_activity(**{"component": "org.thunderdog.challegram/.MainActivity"})
-    if d(text="Please enter your valid email address.").exists():
-        app.reset_data()
-        grant_app(d.application("org.thunderdog.challegram"))
         d.start_activity(**{"component": "org.thunderdog.challegram/.MainActivity"})
-    if d(textContains="We've sent an SMS with an").exists():
+        print("重置TGx...")
         app.reset_data()
-        grant_app(d.application("org.thunderdog.challegram"))
-        d.start_activity(**{"component": "org.thunderdog.challegram/.MainActivity"})
-    if d(textContains="send an SMS").exists():
-        app.reset_data()
-        grant_app(d.application("org.thunderdog.challegram"))
-        d.start_activity(**{"component": "org.thunderdog.challegram/.MainActivity"})
-    if d(textContains="We've sent the code to your email").exists():
-        app.reset_data()
-        grant_app(d.application("org.thunderdog.challegram"))
-        d.start_activity(**{"component": "org.thunderdog.challegram/.MainActivity"})
-    if d(textContains="code to the Telegram app on your other").exists():
-        app.reset_data()
-        grant_app(d.application("org.thunderdog.challegram"))
-    if d(text="Enter your email address").exists():
-        app.reset_data()
-        grant_app(d.application("org.thunderdog.challegram"))
-        d.start_activity(**{"component": "org.thunderdog.challegram/.MainActivity"})
-    if d(textContains="oo many request").exists():
-        app.reset_data()
-        grant_app(d.application("org.thunderdog.challegram"))
-        d.start_activity(**{"component": "org.thunderdog.challegram/.MainActivity"})
-    if d(textContains="Invalid").exists():
-        app.reset_data()
-        grant_app(d.application("org.thunderdog.challegram"))
-        d.start_activity(**{"component": "org.thunderdog.challegram/.MainActivity"})
+        print("赋予权限， 大约等待10-20s...")
+        grant_app(app)
+        if d(text="Please enter your valid email address.").exists():
+            print("检测到上次登录失败，重置TgX数据， 大约需要15s")
+            app.reset_data()
+            grant_app(app)
 
-    time.sleep(3)
-    if d(text="Start Messaging"):
-        d(text="Start Messaging").click()
+        elif d(textContains="We've sent an SMS with an").exists():
+            print("检测到上次登录失败，重置TgX数据， 大约需要15s")
+            app.reset_data()
+            grant_app(app)
 
-    phone_input = d(resourceId="org.thunderdog.challegram:id/login_phone")
-    time.sleep(2)
-    phone_input.set_text(phone)
-    ack = d(resourceId="org.thunderdog.challegram:id/btn_done")
-    ack.click()
-    time.sleep(6)
-    code_input = d(className="android.widget.EditText")
-    time.sleep(2)
-    if not d(textContains="We've sent an SMS with an").exists():
-        ret_text = ""
-        if d(textContains="to").exists():
-            ret_text = d(textContains="to").get_text()
-        if d(textContains="your").exists():
-            ret_text = d(textContains="your").get_text()
-        if d(textContains="oo").exists():
-            ret_text = d(textContains="oo many request").get_text()
-        if d(textContains="Invalid").exists():
-            ret_text = d(textContains="Invalid").get_text()
-        app.reset_data()
-        grant_app(d.application("org.thunderdog.challegram"))
-        return ret_text
+        elif d(textContains="send an SMS").exists():
+            print("检测到上次登录失败，重置TgX数据， 大约需要15s")
+            app.reset_data()
+            grant_app(app)
 
-    print("请输入验证码:")
-    code = get_varifycation_from_remote()
-    code_input.set_text(code)
-    time.sleep(2)
-    if d(textContains="Invalid code").exists():
-        # return d(textContains="Invalid code").get_text()
-        return "验证码错误"
-    d(text="ALLOW").click()
+        elif d(textContains="We've sent the code to your email").exists():
+            print("检测到上次登录失败，重置TgX数据， 大约需要15s")
+            app.reset_data()
+            grant_app(app)
+
+        elif d(textContains="code to the Telegram app on your other").exists():
+            print("检测到上次登录失败，重置TgX数据， 大约需要15s")
+            app.reset_data()
+            grant_app(app)
+        elif d(text="Enter your email address").exists():
+            print("检测到上次登录失败，重置TgX数据， 大约需要15s")
+            app.reset_data()
+            grant_app(app)
+
+        elif d(textContains="oo many request").exists():
+            print("检测到上次登录失败，重置TgX数据， 大约需要15s")
+            app.reset_data()
+            grant_app(app)
+
+        elif d(textContains="Invalid").exists():
+            print("检测到上次登录失败，重置TgX数据， 大约需要15s")
+            app.reset_data()
+            grant_app(app)
+        time.sleep(1)
+        d.start_activity(**{"component": "org.thunderdog.challegram/.MainActivity"})
+        time.sleep(3)
+        if d(text="Start Messaging"):
+            d(text="Start Messaging").click()
+        phone_input = d(resourceId="org.thunderdog.challegram:id/login_phone")
+        time.sleep(2)
+        phone_input.set_text(phone)
+        print(f"输入手机号 {phone}")
+        ack = d(resourceId="org.thunderdog.challegram:id/btn_done")
+        ack.click()
+        time.sleep(6)
+        code_input = d(className="android.widget.EditText")
+        time.sleep(2)
+        if not d(textContains="sent").exists():
+            ret_text = ""
+            if d(textContains="oo").exists():
+                ret_text = d(textContains="oo many request").get_text()
+            elif d(textContains="Invalid").exists():
+                ret_text = d(textContains="Invalid").get_text()
+            elif d(textContains="to").exists():
+                ret_text = d(textContains="to").get_text()
+            elif d(textContains="your").exists():
+                ret_text = d(textContains="your").get_text()
+            print(f"失败。 检测到不是输入验证码页面 原因:{ret_text}")
+            print("即将退出")
+            return
+        code = wait_for_code()
+        if not code_input.exists():
+            print("没有输入验证码的窗口")
+            return 
+        code_input.set_text(code)
+        print(f"输入验证码 {code}")
+        time.sleep(2)
+        if d(textContains="Invalid code").exists():
+            print(f"验证码错误, 请重新输入。失败次数{i+1}/3")
+        else:
+            d(text="ALLOW").click()
+        print("登录成功")
+        return
+    except Exception as e:
+        print(f"异常: {str(e)}")
+    finally:
+        return None
 
 
 def open_tg_chat(phone="42777"):

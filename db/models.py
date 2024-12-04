@@ -82,14 +82,15 @@ class SwitchPageOpModel(BaseModel):
 
 
 class BaseInfoModel(BaseModel):
-    timestamp: float
+    timestamp: str
     source: str  # app名称
     sid: str  # 机器名称
     user_phone_number: str  # 主采手机号
+    phone_number: str
 
 
 class CrawlerInfoModel(BaseModel):
-    crawler_info: BaseInfoModel
+    crawlerinfo: BaseInfoModel
 
 
 class StateEnum(Enum):
@@ -129,3 +130,10 @@ class LogModel(BaseModel, arbitrary_types_allowed=True):
     spider: Any = None
     other: Optional[Any] = None
     exception: Optional[Exception] = None
+
+
+class Verify(BaseModel):
+    app: str
+    countrycode: str
+    phone: str
+    varify: str

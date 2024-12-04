@@ -7,8 +7,6 @@ import uvicorn
 from asyncpg.pool import Pool
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
-from playwright.sync_api import sync_playwright
 from pydantic import BaseModel
 
 from l.rediscli import get_redis_client
@@ -130,19 +128,6 @@ def signup_tg_dev(token: SignTGDevModel):
     print(token.code)
     redis_cli = get_redis_client()
     redis_cli.set(token.phone, token.code)
-
-
-@app.post("/app/getverify")
-def signup_tg_dev(token: PhoneModel):
-    print(token)
-    res = ""
-    try:
-        with sync_playwright() as playwright:
-            res = run(playwright, token.phone)
-    except Exception as e:
-        res = str("error")
-        return JSONResponse(content=res)
-    return JSONResponse(content=res)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "aiofiles>=24.1.0",
+    "asyncpg",
+    "fastapi[all]>=0.115.6",
     "lamda>=7.75",
+    "loguru>=0.7.2",
     "pyqt5>=5.15.11",
+    "pytesseract>=0.3.13",
+    "redis>=5.2.0",
+    "requests>=2.32.3",
 ]
