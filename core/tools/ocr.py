@@ -1,32 +1,4 @@
-"""
-Author: liupeitao sudolovelnpctly6869@outlook.com
-Date: 2024-11-26 17:43:56
-LastEditors: liupeitao sudolovelnpctly6869@outlook.com
-LastEditTime: 2024-11-29 12:53:17
-FilePath: /spider-android/tools/ocr.py
-Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
-"""
-
-"""
-Author: liupeitao sudolovelnpctly6869@outlook.com
-Date: 2024-11-26 17:43:56
-LastEditors: liupeitao sudolovelnpctly6869@outlook.com
-LastEditTime: 2024-11-28 11:47:09
-FilePath: /spider-android/tools/ocr.py
-Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
-"""
-
-"""
-Author: liupeitao sudolovelnpctly6869@outlook.com
-Date: 2024-11-26 14:09:18
-LastEditors: liupeitao sudolovelnpctly6869@outlook.com
-LastEditTime: 2024-11-26 15:53:33
-FilePath: /lamda/tools/ocr.py
-Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
-"""
-
 import base64
-import pprint
 import re
 from pathlib import Path
 
@@ -36,6 +8,7 @@ from PIL import Image
 LOGIN_PATTERN = re.compile(r"Login code: (\d+)")
 LOGIN_TIME = re.compile(r"(\d+:\d+\s?[PA]M).*Login code")
 WEB_LOGIN_CODE = re.compile(r"login code: (\w+)")
+WEB_LOGIN_CODE1 = re.compile(r"your login code:\s+(\w+)")
 WEB_LOGIN_TIME = re.compile(r"(\d+:\d+\s?[PA]M) Web login code")
 
 # Path to the image file
@@ -55,10 +28,15 @@ def extract_varifycation(img: Path):
         web_varify = WEB_LOGIN_CODE.search(text).group(1)
     except Exception:
         web_varify = None
+    if web_varify is None:
+        try:        
+            web_varify = WEB_LOGIN_CODE1.search(text).group(1)
+        except Exception:
+            web_varify = None
     try:
         web_varify_date = WEB_LOGIN_TIME.search(text).group(1)
     except Exception:
-        web_varify = None
+        web_varify_date = None
     try:
         varify = LOGIN_PATTERN.search(text).group(1)
     except Exception:

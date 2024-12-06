@@ -45,6 +45,5 @@ def get_application(prefix) -> FastAPI:
 
 app = get_application("/api/v1/Task")
 
-
 if __name__ == "__main__":
-    uvicorn.run(app, host="192.168.9.31", port=7002, log_level="info")
+    uvicorn.run(app="app:app", host="192.168.9.31", port=7002, log_level="info", workers=3)

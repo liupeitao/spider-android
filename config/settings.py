@@ -37,7 +37,7 @@ class BaseConfig:
     MONGO_DB = "spider"
     MONGO_URL = "mongodb://root:root123456@192.168.9.28:27017/admin"
     REMOTE_SERVER = "http://localhost"
-
+    TG_MAIL_LOGIN_SURPORT=True
 
 #: 开发环境
 class DevelopmentConfig(BaseConfig):

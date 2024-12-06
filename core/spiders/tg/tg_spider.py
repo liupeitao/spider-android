@@ -11,15 +11,16 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 # intent.setAction("android.intent.action.VIEW");
 # intent.setData(android.net.Uri.parse("tg://resolve?phone=" + phoneNumber));
 import datetime
+from pathlib import Path
 import time
 
 import redis
 import requests
 from lamda.client import GrantType, Point
-
+from config import config
 from core.androidspider import AndroidSpider
 from core.db.models import App, DeviceModel
-
+from core.tools.ocr import extract_varifycation
 redis_client = redis.from_url("redis://:root123456@192.168.9.37:6379/0",  decode_responses=True)
 
 
@@ -29,14 +30,31 @@ def get_varifycation_from_remote():
     )
 
 
+
 class TGSpider(AndroidSpider):
     def __init__(self, app: App = App(app="Telegram"), device: DeviceModel=DeviceModel(ip='192.168.9.6', dtype="android")):
         super().__init__(app, device=device)
 
-    def wait_for_code(self) -> str:
-        return redis_client.get(
-            f"""{self.app.app}:code:{self.app.countrycode.countrycode+self.app.phone}"""
-        )
+    def request_varify_code(self) -> str:
+        # #TODO 如果发送到邮箱， 否则是短信。。。
+        if self.d(textContains="mail").exists() and config.TG_MAIL_LOGIN_SURPORT:
+            try:
+                res = requests.post("http://localhost:7001/api/v1/Task/gamil/varyfication", json={
+                "app": "Gmail",
+                "countrycode": self.countrycode,
+                "phone": self.phone,
+                "task_uid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3"
+                })
+            except Exception:
+                print("没有验证码")
+                return
+            else:
+                verification_code = res.json()[0].split(":")[-1].strip()
+                return verification_code
+        else:
+            return redis_client.get(
+                f"""{self.app.app}:code:{self.app.countrycode.countrycode+self.app.phone}"""
+            )
     def scroll_to_bottom(self,reverse=False):
         for i in range(3):
             A = Point(x=300, y=200)
@@ -130,13 +148,15 @@ class TGSpider(AndroidSpider):
                 print(f"失败。 检测到不是输入验证码页面 原因:{ret_text}")
                 print("即将退出")
                 return
-            time.sleep(40)
-            code = self.wait_for_code()
+            print("等待20s")
+            for i in range(1,20):
+                print(i, end=' ')
+            code = self.request_varify_code()
             if not code_input.exists():
                 print("没有输入验证码的窗口")
                 return
             code_input.set_text(code)
-            print(f"输入验证码 {code}")
+            print(f"输入的验证码 {code}")
             time.sleep(2)
             if self.d(textContains="Invalid code").exists():
                 print("验证码错误")
@@ -149,6 +169,31 @@ class TGSpider(AndroidSpider):
         finally:
             return None
 
+    def get_develop_signup_code(self):
+        def open_tg_chat(phone="42777"):
+            self.d.start_activity(action="android.intent.action.VIEW", data=f"https://t.me/+{phone}")
+            time.sleep(2)
+            self.d.click(Point(x=690, y=448))        
+        def get_last_varifycation_shot(img_path: Path):
+            ff = self.d(className="android.view.View")
+            eles = [
+                x
+                for x in ff.info_of_all_instances()
+                if x.visibleBounds.left == 0
+                and x.visibleBounds.right == 720
+                and x.visibleBounds.bottom - x.visibleBounds.top > 500
+                and x.visibleBounds.bottom - x.visibleBounds.top < 1000
+            ]
+            self.d.screenshot(quality=60, bound=eles[0].bounds).save(img_path)
+        open_tg_chat()
+        self.scroll_to_bottom()
+        img_path = Path(f"static/dev_{self.phone}_{datetime.datetime.now().strftime('%H-%M-%S')}.png")
+        get_last_varifycation_shot(img_path=img_path)
+        res = extract_varifycation(img_path)
+        return res
+    
+
+        
 
 def grant_app(app):
     permissions = [
@@ -163,39 +208,3 @@ def grant_app(app):
             app.grant(permission, mode=GrantType.GRANT_ALLOW)
         except Exception:
             pass
-
-
-# def open_tg_chat(phone="42777"):
-#     d.start_activity(action="android.intent.action.VIEW", data=f"https://t.me/+{phone}")
-#     time.sleep(2)
-#     d.click(Point(x=690, y=448))
-
-
-
-
-# def get_last_varifycation(img_path: Path):
-#     ff = d(className="android.view.View")
-#     eles = [
-#         x
-#         for x in ff.info_of_all_instances()
-#         if x.visibleBounds.left == 0
-#         and x.visibleBounds.right == 720
-#         and x.visibleBounds.bottom - x.visibleBounds.top > 500
-#         and x.visibleBounds.bottom - x.visibleBounds.top < 1000
-#     ]
-#     d.screenshot(quality=60, bound=eles[0].bounds).save(img_path)
-
-
-# def screent_shot_varify(img_path: Path):
-#     open_tg_chat()
-#     scroll_to_bottom()
-#     get_last_varifycation(img_path=img_path)
-
-
-# def get_varifycation(phone, img_path: Path):
-#     screent_shot_varify(img_path=img_path)
-#     res = extract_varifycation(img_path)
-#     redis_client.setex(phone, 60, value=pickle.dumps(res))
-#     res.pop("img")
-#     print(res)
-    # return res
