@@ -1,16 +1,13 @@
 import datetime
 import pickle
-import sys
 import time
 from pathlib import Path
 
 import redis
 import requests
 from lamda.client import Device, GrantType, Point
-from lamda.const import *
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtWidgets import (
-    QApplication,
     QInputDialog,
     QLabel,
     QLineEdit,

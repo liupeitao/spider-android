@@ -44,7 +44,7 @@ def extract_varifycation(img: Path):
     try:
         varify_date = LOGIN_TIME.search(text).group(1)
     except Exception:
-        varify = None
+        varify_date = None
     return {
         "varify": {"code": varify, "time": varify_date},
         "web_varify": {"code": web_varify, "time": web_varify_date},
