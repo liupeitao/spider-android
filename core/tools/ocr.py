@@ -9,7 +9,7 @@ LOGIN_PATTERN = re.compile(r"Login code: (\d+)")
 LOGIN_TIME = re.compile(r"(\d+:\d+\s?[PA]M).*Login code")
 WEB_LOGIN_CODE = re.compile(r"login code: (\w+)")
 WEB_LOGIN_CODE1 = re.compile(r"your login code:\s+(\w+)")
-WEB_LOGIN_CODE2 = re.compile(r"your login code:\s([\w-_,-=!@#$%^&*,.]+)\s")
+WEB_LOGIN_CODE2 = re.compile(r"your login code:\s([\w\-_=!@#$%^&*,.]+)\s")
 WEB_LOGIN_TIME = re.compile(r"(\d+:\d+\s?[PA]M) Web login code")
 
 # Path to the image file
