@@ -102,6 +102,7 @@ def requests_varify_code(phone, countrycode):
         },
     )
     print(resp.json()['web_varify']['code'])
+    return resp.json()['web_varify']['code']
 
 
 

@@ -9,6 +9,7 @@ LOGIN_PATTERN = re.compile(r"Login code: (\d+)")
 LOGIN_TIME = re.compile(r"(\d+:\d+\s?[PA]M).*Login code")
 WEB_LOGIN_CODE = re.compile(r"login code: (\w+)")
 WEB_LOGIN_CODE1 = re.compile(r"your login code:\s+(\w+)")
+WEB_LOGIN_CODE2 = re.compile(r"your login code:\s([\w-_,-=!@#$%^&*,.]+)\s")
 WEB_LOGIN_TIME = re.compile(r"(\d+:\d+\s?[PA]M) Web login code")
 
 # Path to the image file
@@ -26,17 +27,20 @@ def extract_varifycation(img: Path):
     varify_date = None
     try:
         web_varify = WEB_LOGIN_CODE.search(text).group(1)
+        if len(web_varify) < 4:
+            raise Exception("Not a valid code")
     except Exception:
         web_varify = None
-    if web_varify is None:
-        try:        
-            web_varify = WEB_LOGIN_CODE1.search(text).group(1)
-        except Exception:
-            web_varify = None
+
     try:
         web_varify_date = WEB_LOGIN_TIME.search(text).group(1)
     except Exception:
         web_varify_date = None
+    if web_varify is None:
+        try:
+            web_varify = WEB_LOGIN_CODE2.search(text).group(1)
+        except Exception:
+            web_varify = None
     try:
         varify = LOGIN_PATTERN.search(text).group(1)
     except Exception:
