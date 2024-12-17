@@ -126,6 +126,12 @@ class TGSpider(AndroidSpider):
             time.sleep(3)
             if self.d(text="Start Messaging"):
                 self.d(text="Start Messaging").click()
+            country_code_input = self.d(resourceId="org.thunderdog.challegram:id/login_code")
+            time.sleep(2)
+            country_code_input.set_text(self.app.countrycode)
+            print(f"输入国家代码 {self.app.countrycode}")
+            time.sleep(1)
+
             phone_input = self.d(resourceId="org.thunderdog.challegram:id/login_phone")
             time.sleep(2)
             phone_input.set_text(self.app.phone)
@@ -185,12 +191,17 @@ class TGSpider(AndroidSpider):
                 and x.visibleBounds.bottom - x.visibleBounds.top < 1000
             ]
             self.d.screenshot(quality=60, bound=eles[0].bounds).save(img_path)
-        open_tg_chat()
-        self.scroll_to_bottom()
-        img_path = Path(f"static/dev_{self.phone}_{datetime.datetime.now().strftime('%H-%M-%S')}.png")
-        get_last_varifycation_shot(img_path=img_path)
-        res = extract_varifycation(img_path)
-        return res
+        try:
+            open_tg_chat()
+            self.scroll_to_bottom()
+            img_path = Path(f"static/dev_{self.phone}_{datetime.datetime.now().strftime('%H-%M-%S')}.png")
+            get_last_varifycation_shot(img_path=img_path)
+            res = extract_varifycation(img_path)
+        except Exception as e:
+            print(f"失败没有登录{str(e)}")
+            return {}
+        else:
+            return res
     
 
         
