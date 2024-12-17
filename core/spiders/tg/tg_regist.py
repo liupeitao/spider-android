@@ -3,6 +3,8 @@ import requests
 
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright
+from config.settings import config
+from core.db.models import ReturnModel
 
 def parse_api_info(source):
     res = {}
@@ -93,7 +95,7 @@ async def create_app(page):
 
 def requests_varify_code(phone, countrycode):
     resp = requests.post(
-        "http://192.168.9.31:7002/api/v1/Task/Telegram/varification",
+        config.TG_VERIFICATION_CODE_URL,
         json={
             "app": "Amap",
             "countrycode": countrycode,
@@ -137,26 +139,23 @@ async def _run(playwright, phone, countrycode):
             api_id, api_hash = parse_api_info(await page.content())
             print("该手机号已经注册过了")
             print({"phone": countrycode+phone, "api_id": api_id, "api_hash": api_hash})
-            return {"phone": countrycode+phone, "api_id": api_id, "api_hash": api_hash}
+            r_json = {"phone": countrycode+phone, "api_id": api_id, "api_hash": api_hash}
+            return ReturnModel(data=r_json, success=True)
     await fill_app_title(page, "fjlkdsfsdjfls")
     await page.wait_for_timeout(2000)
     await fill_app_short_name(page, "fjlkdsfgg")
     await page.wait_for_timeout(2000)
 
     if not await create_app(page):
-        print("创建失败")
+        raise Exception("创建失败")
     await page.wait_for_timeout(3000)
     source = await page.content()
-    with open(f"html/{phone}.html", "w") as f:
-        f.write(source)
     api_id, api_hash = parse_api_info(source)
     print({"phone": countrycode+phone, "api_id": api_id, "api_hash": api_hash})
     if api_id == 0:
         raise Exception("注册失败")
-    await page.screenshot(path=f"html/{phone}.png")
-    await page.wait_for_timeout(3000)
     r_json = {"phone": countrycode+phone, "api_id": api_id, "api_hash": api_hash}
-    return r_json
+    return ReturnModel(data=r_json, success=True)
 
 async def run(phone, countrycode)-> dict:
     try:

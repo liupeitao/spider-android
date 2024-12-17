@@ -13,11 +13,14 @@ from core.spiders.tg.tg_regist import run
 from const import RESPONSE_MSG
 from core.db.models import App
 from core.spiders.tg.tg_spider import TGSpider
-
+from core.db.models import ReturnModel
+from fastapi import Depends
+from core.db.mgdb import get_mongo
+from motor.motor_asyncio import AsyncIOMotorClient
 router = APIRouter()
 
 
-@router.post("/", summary="TG登录")
+@router.post("/loginapp", summary="TG登录")
 def tg_spider_all(background_tasks: BackgroundTasks, item: App):
     item.app = "Telegram"
     tg_spider = TGSpider(item)
@@ -32,9 +35,41 @@ def get_varification(background_tasks: BackgroundTasks, item: App):
     return JSONResponse(r)
 
 
+
 @router.post("/registerdev", summary="注册开发者帐号")
-async def register_dev(background_tasks: BackgroundTasks, item: App):
+async def register_dev( background_tasks: BackgroundTasks, item: App, mgdb_client:AsyncIOMotorClient=Depends(get_mongo)):
     item.app = "Telegram"
-    res = await run(phone=item.phone, countrycode=item.countrycode)
-    return res
+    try:
+        res = await run(phone=item.phone, countrycode=item.countrycode)
+        db = mgdb_client.TG 
+        coll = db.user
+        meta_data = {
+            "registed" :True,
+            "session_ok":False,
+            "password":""
+        }
+        meta_data.update(res.data)
+        try:
+            coll.insert_one({
+                meta_data
+            })
+        except Exception:
+            return res
+    except Exception as e:
+        return ReturnModel(success=False, msg=str(e))
+    else: 
+        return res
+
+
+@router.post("/loginsession", summary="登录")
+async def login( background_tasks: BackgroundTasks, item: App, mgdb_client:AsyncIOMotorClient=Depends(get_mongo)):
+    item.app = "Telegram" 
+    tg_spider = TGSpider(item)
+    print(tg_spider.phone)
+    try:
+        await tg_spider.login()
+    except Exception as e:
+        return ReturnModel(success=False, msg=str(e))
+    else:
+        return ReturnModel(success=True, msg="登录成功")
     

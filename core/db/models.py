@@ -146,3 +146,9 @@ class DeviceModel(BaseModel):
     dtype: DeviceType
     ip: str
     port: Optional[int] = None
+
+class ReturnModel(BaseModel):
+    success: bool
+    msg: str = ""
+    data: Any = {}
+    code: int = 200

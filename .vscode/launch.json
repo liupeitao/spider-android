@@ -1,5 +1,6 @@
 {
     "configurations": [
+        
         {
             "name": "🐍 Python Debugger: Current File",
             "type": "debugpy",
@@ -21,7 +22,7 @@
                 "--host",
                 "192.168.9.31",
                 "--port",
-                "8002"
+                "7002"
             ],
             "cwd": "${workspaceFolder}"
         }

@@ -13,6 +13,8 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 import datetime
 from pathlib import Path
 import time
+from typing import Literal
+from socks import SOCKS5
 
 import redis
 import requests
@@ -20,20 +22,31 @@ from lamda.client import GrantType, Point
 from config import config
 from core.androidspider import AndroidSpider
 from core.db.models import App, DeviceModel
+
 from core.tools.ocr import extract_varifycation
+from telethon import TelegramClient
 redis_client = redis.from_url("redis://:root123456@192.168.9.37:6379/0",  decode_responses=True)
 
 
-def get_varifycation_from_remote():
-    return requests.get(
-        "http://192.168.9.25:8011/code", params={"phone_number": "18112953195"}
-    )
+def get_varifycation_from_remote(countryode, phone):
+    resp = requests.post(
+        config.TG_VERIFICATION_CODE_URL, 
+        json={
+            "phone":phone,
+            "countrycode":countryode
+        }
+    ).json()
+    if not resp['code']:
+        raise Exception("没有提取到验证码")
+    return resp['code']  
 
 
 
 class TGSpider(AndroidSpider):
     def __init__(self, app: App = App(app="Telegram"), device: DeviceModel=DeviceModel(ip='192.168.9.6', dtype="android")):
         super().__init__(app, device=device)
+        self.passwd = ""
+        self.password = self.passwd
 
     def request_varify_code(self) -> str:
         # #TODO 如果发送到邮箱， 否则是短信。。。
@@ -203,7 +216,43 @@ class TGSpider(AndroidSpider):
         else:
             return res
     
+    async def login(self):
+        self.proxy_host = "localhost"
+        self.proxy_port = 7890
+        proxy = (SOCKS5, self.proxy_host, self.proxy_port)
+        real_phone = self.countrycode + self.phone
+        self.api_id = 23230346
+        self.api_hash = "eed20012f08c4c398f91ffd98e039373"
+        client = TelegramClient(real_phone, self.api_id, self.api_hash, proxy=proxy) 
+        if self.password == "no" or self.password == "":
+            await client.start(real_phone,  code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone).json()) 
+        else:
+            await client.start(real_phone,  password=self.password, code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone).json())
+  
 
+    def check_session(self):
+        session_path = config.TG_USER_SESSION_DIR  / (self.countrycode + self.phone)
+        if not session_path.exists():
+            api_id, api_hash = self.check_dev()
+            self.api_id = api_id
+            self.api_hash = api_hash
+            if not api_id or api_hash:
+                return None
+            
+
+            self.login(api_id, api_hash)
+
+    def check_dev(self):
+        return "", ""
+    def crawl(self, witch_task:  Literal['dialogs', 'chats', 'members']):
+        if witch_task == "dialogs":
+            self.crawl_dialogs()
+        elif witch_task == "chats":
+            self.crawl_chats()
+        elif witch_task == "members":
+            self.crawl_members()
+        else:
+            print("没有这个任务")
         
 
 def grant_app(app):
