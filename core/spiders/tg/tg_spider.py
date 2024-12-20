@@ -38,6 +38,7 @@ def get_varifycation_from_remote(countryode, phone):
     ).json()
     if not resp['code']:
         raise Exception("没有提取到验证码")
+    print("登录验证码 ", resp['code'])
     return resp['code']  
 
 
@@ -66,7 +67,7 @@ class TGSpider(AndroidSpider):
                 return verification_code
         else:
             return redis_client.get(
-                f"""{self.app.app}:code:{self.app.countrycode.countrycode+self.app.phone}"""
+                f"""{self.app.app}:code:{self.app.countrycode+self.app.phone}"""
             )
     def scroll_to_bottom(self,reverse=False):
         for i in range(3):
@@ -84,6 +85,7 @@ class TGSpider(AndroidSpider):
 
 
     def crawl_login(self):
+        # TODO  触发短信didn't get the code org.thunderdog.challegram:id/btn_forgotPassword
         try:
             tg_client = self.d.application("org.thunderdog.challegram")
             print("===== TgX Login ======")
@@ -224,10 +226,19 @@ class TGSpider(AndroidSpider):
         self.api_id = 23230346
         self.api_hash = "eed20012f08c4c398f91ffd98e039373"
         client = TelegramClient(real_phone, self.api_id, self.api_hash, proxy=proxy) 
-        if self.password == "no" or self.password == "":
-            await client.start(real_phone,  code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone).json()) 
+        try:
+            if self.password == "no" or self.password == "":
+                await client.start(real_phone,  code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone).json()) 
+            else:
+                await client.start(real_phone,  password=self.password, code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone).json())
+        except Exception as e:
+            print(f"登录失败 {str(e)}")
+            return False
         else:
-            await client.start(real_phone,  password=self.password, code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone).json())
+            r = await client.get_dialogs()
+            print(r.to_dict())
+            print("登录成功")
+            return True
   
 
     def check_session(self):

@@ -119,7 +119,7 @@ async def _run(playwright, phone, countrycode):
     await get_verification_code(page)
     await page.wait_for_timeout(2000)
     print("输入验证码")
-    await asyncio.sleep(15) # 等待15s是为了过提醒
+    await asyncio.sleep(7) # 等待7s是为了过提醒
     verification_code = requests_varify_code(phone=phone, countrycode=countrycode)
     print(f"提取的验证码是:{verification_code}")
     await input_verification_code(page, verification_code)

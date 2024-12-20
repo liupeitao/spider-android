@@ -25,7 +25,7 @@ class BaseConfig:
     REMOTE_PROXY = "http://localhost"
     
     # # Postgresql
-    PG_HOST = "192.168.9.28"
+    PG_HOST = "192.168.9.37"
     PG_PORT = 5432
     PG_DB = "postgres"
     PG_USER = "admin"
@@ -35,7 +35,6 @@ class BaseConfig:
     PG_MAX_CONNECTION_COUNT = 10
 
     MONGO_DB = "spider"
-    MONGO_URL = "mongodb://root:root123456@192.168.9.28:27017/admin" 
     REMOTE_SERVER = "http://localhost" 
     TG_MAIL_LOGIN_SURPORT=True 
     TG_USER_SESSION_DIR= Path("/home/liupeitao/tgsessions")
@@ -48,7 +47,7 @@ class DevelopmentConfig(BaseConfig):
     REMOTE_PROXY = "http://localhost"
 
     # # Postgresql
-    PG_HOST = "124.220.6.43"
+    PG_HOST = "192.168.9.37"
     PG_PORT = 5432
     PG_DB = "postgres"
     PG_USER = "admin"
@@ -58,7 +57,7 @@ class DevelopmentConfig(BaseConfig):
     PG_MAX_CONNECTION_COUNT = 10
 
     MONGO_DB = "spider"
-    MONGO_URL = "mongodb://root:root123456@124.220.6.43:27017/admin"
+    MONGO_URL = "mongodb://root:root123456@192.168.9.37:27017/admin"
     REMOTE_SERVER = "http://localhost"
 
 

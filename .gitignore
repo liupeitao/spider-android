@@ -6,6 +6,7 @@ tests/
 
 # C extensions
 *.so
+*.session
 
 # Distribution / packaging
 .Python
