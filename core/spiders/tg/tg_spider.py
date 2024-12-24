@@ -229,7 +229,8 @@ class TGSpider(AndroidSpider):
         real_phone = self.countrycode + self.phone
         self.api_id = user.config.api_id
         self.api_hash = user.config.api_hash
-        client = TelegramClient(real_phone, self.api_id, self.api_hash, proxy=proxy) 
+        session_str = str(config.TG_USER_SESSION_DIR / real_phone)
+        client = TelegramClient(session_str    , self.api_id, self.api_hash, proxy=proxy) 
         try:
             if self.password == "no" or self.password == "":
                 await client.start(real_phone,  code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone)) 
@@ -239,8 +240,6 @@ class TGSpider(AndroidSpider):
             print(f"登录失败 {str(e)}")
             return False
         else:
-            r = await client.get_dialogs()
-            print(r.to_dict())
             print("登录成功")
             return True
   

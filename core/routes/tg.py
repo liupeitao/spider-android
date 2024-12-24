@@ -93,5 +93,6 @@ async def login( background_tasks: BackgroundTasks, item: App, mgdb_client:Async
     except Exception as e:
         return ReturnModel(success=False, msg=str(e))
     else:
-        return ReturnModel(success=True, msg="登录成功")
+        coll.update_one({"phone":item.countrycode+item.phone}, {"$set":{"session_ok":True}}) 
+        return ReturnModel(success=True, msg="登录成功", data=user.model_dump())
     
