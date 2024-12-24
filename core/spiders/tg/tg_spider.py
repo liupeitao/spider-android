@@ -22,6 +22,7 @@ from lamda.client import GrantType, Point
 from config import config
 from core.androidspider import AndroidSpider
 from core.db.models import App, DeviceModel
+from core.db.models import UserModel
 
 from core.tools.ocr import extract_varifycation
 from telethon import TelegramClient
@@ -29,17 +30,20 @@ redis_client = redis.from_url("redis://:root123456@192.168.9.37:6379/0",  decode
 
 
 def get_varifycation_from_remote(countryode, phone):
-    resp = requests.post(
-        config.TG_VERIFICATION_CODE_URL, 
-        json={
-            "phone":phone,
-            "countrycode":countryode
-        }
-    ).json()
-    if not resp['code']:
-        raise Exception("没有提取到验证码")
-    print("登录验证码 ", resp['code'])
-    return resp['code']  
+    #TODO 从远程获取验证码
+    code = input("请输入验证码")
+    return code
+    # resp = requests.post(
+    #     config.TG_VERIFICATION_CODE_URL, 
+    #     json={
+    #         "phone":phone,
+    #         "countrycode":countryode
+    #     }
+    # ).json()
+    # if not resp['code']:
+    #     raise Exception("没有提取到验证码")
+    # print("登录验证码 ", resp['code'])
+    # return resp['code']  
 
 
 
@@ -218,19 +222,19 @@ class TGSpider(AndroidSpider):
         else:
             return res
     
-    async def login(self):
-        self.proxy_host = "localhost"
-        self.proxy_port = 7890
+    async def login(self, user:UserModel):
+        self.proxy_host = user.config.proxy_host
+        self.proxy_port = user.config.proxy_port
         proxy = (SOCKS5, self.proxy_host, self.proxy_port)
         real_phone = self.countrycode + self.phone
-        self.api_id = 23230346
-        self.api_hash = "eed20012f08c4c398f91ffd98e039373"
+        self.api_id = user.config.api_id
+        self.api_hash = user.config.api_hash
         client = TelegramClient(real_phone, self.api_id, self.api_hash, proxy=proxy) 
         try:
             if self.password == "no" or self.password == "":
-                await client.start(real_phone,  code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone).json()) 
+                await client.start(real_phone,  code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone)) 
             else:
-                await client.start(real_phone,  password=self.password, code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone).json())
+                await client.start(real_phone,  password=self.password, code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone))
         except Exception as e:
             print(f"登录失败 {str(e)}")
             return False

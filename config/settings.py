@@ -40,6 +40,8 @@ class BaseConfig:
     TG_USER_SESSION_DIR= Path("/home/liupeitao/tgsessions")
     TG_VERIFICATION_CODE_URL="http://192.168.9.31:7002/api/v1/Task/Telegram/varification"
     LAMDA_HOST = "192.168.9.8"
+    DEFAULT_PROXY_HOST = "localhost"
+    DEFAULT_PROXY_PORT =7890
 
 #: 开发环境
 class DevelopmentConfig(BaseConfig):

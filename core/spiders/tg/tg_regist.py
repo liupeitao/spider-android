@@ -94,17 +94,20 @@ async def create_app(page):
 
 
 def requests_varify_code(phone, countrycode):
-    resp = requests.post(
-        config.TG_VERIFICATION_CODE_URL,
-        json={
-            "app": "Amap",
-            "countrycode": countrycode,
-            "phone": phone,
-            "task_uid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3",
-        },
-    )
-    print(resp.json()['web_varify']['code'])
-    return resp.json()['web_varify']['code']
+    #TODO 验证码
+    # resp = requests.post(
+    #     config.TG_VERIFICATION_CODE_URL,
+    #     json={
+    #         "app": "Amap",
+    #         "countrycode": countrycode,
+    #         "phone": phone,
+    #         "task_uid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3",
+    #     },
+    # )
+    # print(resp.json()['web_varify']['code'])
+    # return resp.json()['web_varify']['code']
+    varf = input("请输入验证码:")
+    return varf
 
 
 

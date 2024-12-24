@@ -8,6 +8,7 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 '''
 from fastapi import APIRouter, BackgroundTasks
 from fastapi.responses import PlainTextResponse, JSONResponse
+from requests import session
 from core.spiders.tg.tg_regist import run
 
 from const import RESPONSE_MSG
@@ -17,8 +18,8 @@ from core.db.models import ReturnModel
 from fastapi import Depends
 from core.db.mgdb import get_mongo
 from motor.motor_asyncio import AsyncIOMotorClient
+from core.db.models import UserModel, ConfigModel 
 router = APIRouter()
-
 
 @router.post("/loginapp", summary="TG登录")
 def tg_spider_all(background_tasks: BackgroundTasks, item: App):
@@ -28,7 +29,7 @@ def tg_spider_all(background_tasks: BackgroundTasks, item: App):
     return PlainTextResponse(RESPONSE_MSG)
 
 @router.post("/varification", summary="提取APP端的验证码")
-def get_varification(background_tasks: BackgroundTasks, item: App):
+def get_varification(background_tasks: BackgroundTasks, item: App = App()):
     item.app = "Telegram"
     tg_spider = TGSpider(item)
     r = tg_spider.get_develop_signup_code()
@@ -37,21 +38,32 @@ def get_varification(background_tasks: BackgroundTasks, item: App):
 
 
 @router.post("/registerdev", summary="注册开发者帐号")
-async def register_dev( background_tasks: BackgroundTasks, item: App, mgdb_client:AsyncIOMotorClient=Depends(get_mongo)):
+async def register_dev( background_tasks: BackgroundTasks, item: App = App(), mgdb_client:AsyncIOMotorClient=Depends(get_mongo)):
     item.app = "Telegram"
+    db = mgdb_client.TG 
+    coll = db.user
+    user_exist = await coll.find_one({"phone":item.countrycode+item.phone})
+    if user_exist is not None:
+        user_exist = UserModel(**user_exist)
+        if user_exist.registed:
+            return ReturnModel(success=True, data=user_exist.model_dump(), msg="该手机号已经注册过了")
+    
     try:
-        res = await run(phone=item.phone, countrycode=item.countrycode)
-        db = mgdb_client.TG 
-        coll = db.user
+        res:ReturnModel = await run(phone=item.phone, countrycode=item.countrycode)
+        if len(str(res.data['api_id'])) < 6:
+            raise Exception(f"注册失败, {res}")
         meta_data = {
             "registed" :True,
             "session_ok":False,
-            "password":""
+            "password":"",
+            "session_name": item.countrycode + item.phone,
         }
         meta_data.update(res.data)
+        user_config = ConfigModel(**meta_data)
+        user = UserModel(phone=item.countrycode+item.phone, registed=True, session_ok=False, api_hash=res.data['api_hash'], api_id=res.data['api_id'], config=user_config)
         try:
-            coll.insert_one({
-                meta_data
+            await coll.insert_one({
+                user.model_dump()
             })
         except Exception:
             return res
@@ -61,13 +73,23 @@ async def register_dev( background_tasks: BackgroundTasks, item: App, mgdb_clien
         return res
 
 
+
 @router.post("/loginsession", summary="登录")
 async def login( background_tasks: BackgroundTasks, item: App, mgdb_client:AsyncIOMotorClient=Depends(get_mongo)):
+    
     item.app = "Telegram" 
+    db = mgdb_client.TG 
+    coll = db.user
+    user_exist = await coll.find_one({"phone":item.countrycode+item.phone})
+    if user_exist is  None:
+        return ReturnModel(success=False, msg="手机没有在数据库， 请先入库")
+    user = UserModel(**user_exist)
+    if not user.registed:
+        return ReturnModel(success=False, msg="手机没有注册开发者帐号")
     tg_spider = TGSpider(item)
     print(tg_spider.phone)
     try:
-        await tg_spider.login()
+        await tg_spider.login(user=user)
     except Exception as e:
         return ReturnModel(success=False, msg=str(e))
     else:

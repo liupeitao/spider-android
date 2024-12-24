@@ -5,11 +5,36 @@ from uuid import UUID
 from typing import Literal
 
 from pydantic import BaseModel, Field
-
+from config.settings import config
 
 class Channel(BaseModel):
     name: str
 
+class ConfigModel(BaseModel):
+    api_id: int = 0
+    api_hash: str = ""
+    phone: str = ""
+    session_name: str = ""
+    second_password: str = ""
+    chats_dir: str = "chats"
+    memeber_dir: str = "members"
+    media_dir: str = "media"
+    proxy_host: str = config.DEFAULT_PROXY_HOST
+    proxy_port: int = config.DEFAULT_PROXY_PORT
+    limit: int = 1000
+    dialog_path: str = "dialogs"
+    max_size: str = "1M"
+    password: str = ""
+
+
+class UserModel(BaseModel):
+    phone: str = ""
+    api_id: int
+    api_hash: str = ""
+    password: str = ""
+    session_ok: bool = False  # 是否有了会话
+    registed: bool = False  #  是否注册开发者。
+    config: ConfigModel
 
 class AppStartUrl(Enum):
     JD = "https://www.jd.com"
