@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 from core.androidspider import AndroidSpider
 from core.db.models import App, DeviceModel
+from config.settings import config
 
 
 class PhoneNumber(BaseModel):
@@ -17,7 +18,7 @@ NAME = "LetsTalk"
 
 class LetTalk_Spider(AndroidSpider):
     def __init__(
-        self, item: App = App(app="LetsTalk"), device: Optional[DeviceModel] = DeviceModel(ip="192.168.9.6", dtype="android")
+        self, item: App = App(app="LetsTalk"), device: Optional[DeviceModel] = DeviceModel(ip=config.LAMDA_HOST, dtype="android")
     ):
         super().__init__(item, device)
 

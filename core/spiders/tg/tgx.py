@@ -30,6 +30,7 @@ from lamda.const import *
 
 from tools.ocr import extract_varifycation
 from db.models import Verify
+from config.settings import config
 
 redis_client = redis.from_url("redis://:root123456@192.168.9.37:6379/0")
 
@@ -40,7 +41,7 @@ def get_varifycation_from_remote():
     )
 
 
-d = Device("192.168.9.6")
+d = Device(config.LAMDA_HOST)
 
 
 def grant_app(self, app):

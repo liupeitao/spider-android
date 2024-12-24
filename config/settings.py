@@ -39,6 +39,7 @@ class BaseConfig:
     TG_MAIL_LOGIN_SURPORT=True 
     TG_USER_SESSION_DIR= Path("/home/liupeitao/tgsessions")
     TG_VERIFICATION_CODE_URL="http://192.168.9.31:7002/api/v1/Task/Telegram/varification"
+    LAMDA_HOST = "192.168.9.8"
 
 #: 开发环境
 class DevelopmentConfig(BaseConfig):

@@ -21,6 +21,7 @@ from tools.ocr import extract_varifycation
 
 redis_client = redis.from_url("redis://:root123456@192.168.9.37:6379/0")
 
+from config.settings import config
 
 def get_varifycation_from_remote():
     return requests.get(
@@ -28,7 +29,7 @@ def get_varifycation_from_remote():
     )
 
 
-d = Device("192.168.9.6")
+d = Device(config.LAMDA_HOST)
 
 
 class LoginThread(QThread):

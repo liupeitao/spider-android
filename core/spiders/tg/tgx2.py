@@ -16,7 +16,9 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-d = Device("192.168.9.6")
+from config.settings import config
+
+d = Device(config.LAMDA_HOST)
 
 
 class LoginThread(QThread):

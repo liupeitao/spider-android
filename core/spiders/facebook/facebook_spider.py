@@ -19,7 +19,7 @@ import time
 
 from flask import cli
 from lamda.client import Corner, Device, Keys, Point
-
+from config.settings import config
 
 def scroll_to_bottom(reverse=False):
     A = Point(x=300, y=200)
@@ -30,7 +30,7 @@ def scroll_to_bottom(reverse=False):
 
 
 def get_device():
-    d = Device("192.168.9.6")
+    d = Device(config.LAMDA_HOST)
     return d
 
 
