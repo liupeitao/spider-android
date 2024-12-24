@@ -44,7 +44,7 @@ def get_varifycation_from_remote(countryode, phone):
 
 
 class TGSpider(AndroidSpider):
-    def __init__(self, app: App = App(app="Telegram"), device: DeviceModel=DeviceModel(ip='192.168.9.6', dtype="android")):
+    def __init__(self, app: App = App(app="Telegram"), device: DeviceModel=DeviceModel(ip=config.LAMDA_HOST, dtype="android")):
         super().__init__(app, device=device)
         self.passwd = ""
         self.password = self.passwd
