@@ -62,11 +62,11 @@ async def register_dev( background_tasks: BackgroundTasks, item: App = App(), mg
         user_config = ConfigModel(**meta_data)
         user = UserModel(phone=item.countrycode+item.phone, registed=True, session_ok=False, api_hash=res.data['api_hash'], api_id=res.data['api_id'], config=user_config)
         try:
-            await coll.insert_one({
-                user.model_dump()
-            })
-        except Exception:
-            return res
+            await coll.insert_one(
+                user.dict()
+            )
+        except Exception as e:
+            return ReturnModel(success=False, data=res, msg=f"插入数据库没有成功{e}")
     except Exception as e:
         return ReturnModel(success=False, msg=str(e))
     else: 
