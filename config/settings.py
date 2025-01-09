@@ -43,7 +43,7 @@ class BaseConfig:
     LAMDA_HOST = "192.168.9.8"
     DEFAULT_PROXY_HOST = "localhost"
     DEFAULT_PROXY_PORT =7890
-    RESIS_FOR_VERIFY = "redis://:@192.168.9.25:6379/13"
+    REDIS_VERIFICATION_URL = "redis://:@192.168.9.25:6379/13"
 
 #: 开发环境
 class DevelopmentConfig(BaseConfig):

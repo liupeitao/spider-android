@@ -26,7 +26,7 @@ from core.db.models import UserModel
 
 from core.tools.ocr import extract_varifycation
 from telethon import TelegramClient
-redis_client = redis.from_url(config.RESIS_FOR_VERIFY,  decode_responses=True)
+redis_client = redis.from_url(config.REDIS_VERIFICATION_URL,  decode_responses=True)
 
 
 def get_varifycation_from_remote(countryode, phone):
