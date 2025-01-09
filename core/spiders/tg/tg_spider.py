@@ -26,7 +26,7 @@ from core.db.models import UserModel
 
 from core.tools.ocr import extract_varifycation
 from telethon import TelegramClient
-redis_client = redis.from_url("redis://:root123456@192.168.9.37:6379/0",  decode_responses=True)
+redis_client = redis.from_url(config.RESIS_FOR_VERIFY,  decode_responses=True)
 
 
 def get_varifycation_from_remote(countryode, phone):
@@ -68,6 +68,17 @@ class TGSpider(AndroidSpider):
                 return
             else:
                 verification_code = res.json()[0].split(":")[-1].strip()
+                #FIXME  这里是测试代码
+                requests.get(f"http://192.168.9.25:8011/add_code?country_code={self.countrycode}&phone_number={self.phone}&code={verification_code}")
+                c = 0
+                while True():
+                    verification_code = redis_client.get(f"""{self.app.app}:code:{self.app.countrycode+self.app.phone}""")
+                    if verification_code:
+                        break 
+                    time.sleep(1)
+                    c+=1
+                    if c > 100:
+                        raise Exception("获取验证码超时")
                 return verification_code
         else:
             return redis_client.get(
@@ -185,6 +196,7 @@ class TGSpider(AndroidSpider):
             time.sleep(2)
             if self.d(textContains="Invalid code").exists():
                 print("验证码错误")
+                raise Exception("验证码错误")
             else:
                 self.d(text="ALLOW").click()
             print("登录成功")
