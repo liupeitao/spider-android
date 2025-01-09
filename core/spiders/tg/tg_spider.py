@@ -57,7 +57,7 @@ class TGSpider(AndroidSpider):
         # #TODO 如果发送到邮箱， 否则是短信。。。
         if self.d(textContains="mail").exists() and config.TG_MAIL_LOGIN_SURPORT:
             try:
-                res = requests.post("http://localhost:7001/api/v1/Task/gamil/varyfication", json={
+                res = requests.post(config.SPIDER_WEB_GMAIL_VERIFY_URL, json={
                 "app": "Gmail",
                 "countrycode": self.countrycode,
                 "phone": self.phone,
@@ -190,6 +190,7 @@ class TGSpider(AndroidSpider):
             print("登录成功")
             return
         except Exception as e:
+            #TODO 异常: UiSelector[TEXT=Start Messaging] 后续处理
             print(f"异常: {str(e)}")
         finally:
             return None

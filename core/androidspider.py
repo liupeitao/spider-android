@@ -23,4 +23,3 @@ class AndroidSpider(Spider):
         else:
             self.d = Device(device.ip, port=device.port)
         
-    
