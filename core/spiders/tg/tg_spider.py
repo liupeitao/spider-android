@@ -69,8 +69,10 @@ class TGSpider(AndroidSpider):
             else:
                 verification_code = res.json()[0].split(":")[-1].strip()
                 #FIXME  这里是测试代码
+                print(f"验证码{verification_code}发送到后台")
                 requests.get(f"http://192.168.9.25:8011/add_code?country_code={self.countrycode}&phone_number={self.phone}&code={verification_code}")
                 c = 0
+                print(f"验证码{verification_code}发送成功")
                 while True():
                     verification_code = redis_client.get(f"""{self.app.app}:code:{self.app.countrycode+self.app.phone}""")
                     if verification_code:
