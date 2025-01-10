@@ -30,20 +30,20 @@ redis_client = redis.from_url(config.REDIS_VERIFICATION_URL,  decode_responses=T
 
 
 def get_varifycation_from_remote(countryode, phone):
-    #TODO 从远程获取验证码
-    code = input("请输入验证码")
-    return code
-    # resp = requests.post(
-    #     config.TG_VERIFICATION_CODE_URL, 
-    #     json={
-    #         "phone":phone,
-    #         "countrycode":countryode
-    #     }
-    # ).json()
-    # if not resp['code']:
-    #     raise Exception("没有提取到验证码")
-    # print("登录验证码 ", resp['code'])
-    # return resp['code']  
+    # #TODO 从远程获取验证码
+    # code = input("请输入验证码")
+    # return code
+    resp = requests.post(
+        config.TG_VERIFICATION_CODE_URL, 
+        json={
+            "phone":phone,
+            "countrycode":countryode
+        }
+    ).json()
+    if not resp['code']:
+        raise Exception("没有提取到验证码")
+    print("登录验证码 ", resp['code'])
+    return resp['code']  
 
 
 
@@ -69,19 +69,21 @@ class TGSpider(AndroidSpider):
             else:
                 verification_code = res.json()[0].split(":")[-1].strip()
                 #FIXME  这里是测试代码
+                if not verification_code:
+                    raise Exception("没有验证码")
                 print(f"验证码{verification_code}发送到后台")
                 requests.get(f"http://192.168.9.25:8011/add_code?country_code={self.countrycode}&phone_number={self.phone}&code={verification_code}")
-                c = 0
                 print(f"验证码{verification_code}发送成功")
-                while True():
-                    verification_code = redis_client.get(f"""{self.app.app}:code:{self.app.countrycode+self.app.phone}""")
-                    if verification_code:
-                        break 
-                    time.sleep(1)
-                    c+=1
-                    if c > 100:
-                        raise Exception("获取验证码超时")
                 return verification_code
+                # while True:
+                #     verification_code = redis_client.get(f"""{self.app.app}:code:{self.app.countrycode+self.app.phone}""")
+                #     if verification_code:
+                #         break 
+                #     time.sleep(1)
+                #     c+=1
+                #     if c > 100:
+                #         raise Exception("获取验证码超时")
+                # return verification_code
         else:
             return redis_client.get(
                 f"""{self.app.app}:code:{self.app.countrycode+self.app.phone}"""
@@ -214,28 +216,36 @@ class TGSpider(AndroidSpider):
             self.d.start_activity(action="android.intent.action.VIEW", data=f"https://t.me/+{phone}")
             time.sleep(2)
             self.d.click(Point(x=690, y=448))        
-        def get_last_varifycation_shot(img_path: Path):
+        def get_last_varifycation_shot(img_dir: Path)-> list[Path]:
+            pathes = []
             ff = self.d(className="android.view.View")
             eles = [
                 x
                 for x in ff.info_of_all_instances()
                 if x.visibleBounds.left == 0
                 and x.visibleBounds.right == 720
-                and x.visibleBounds.bottom - x.visibleBounds.top > 500
+                and x.visibleBounds.bottom - x.visibleBounds.top > 300
                 and x.visibleBounds.bottom - x.visibleBounds.top < 1000
-            ]
-            self.d.screenshot(quality=60, bound=eles[0].bounds).save(img_path)
+            ]         
+            for index, ele in enumerate(eles):
+                img_path = img_dir / f"{str(index)}.png"
+                self.d.screenshot(quality=60, bound=ele.bounds).save(img_path) 
+                pathes.append(img_path) 
+            return pathes
         try:
             open_tg_chat()
             self.scroll_to_bottom()
-            img_path = Path(f"static/dev_{self.phone}_{datetime.datetime.now().strftime('%H-%M-%S')}.png")
-            get_last_varifycation_shot(img_path=img_path)
-            res = extract_varifycation(img_path)
+            pathes = get_last_varifycation_shot(img_dir=Path("/home/liupeitao/projects/spider-android/static"))
+            ress = []
+            for  path in  pathes:
+                res = extract_varifycation(path)
+                if res['varify']['code'] or res['web_varify']['code']:
+                    ress.append(res)
+                    print(res['varify']['code'], res['web_varify']['code'])
+            return ress[-1]
         except Exception as e:
             print(f"失败没有登录{str(e)}")
             return {}
-        else:
-            return res
     
     async def login(self, user:UserModel):
         self.proxy_host = user.config.proxy_host
@@ -245,12 +255,14 @@ class TGSpider(AndroidSpider):
         self.api_id = user.config.api_id
         self.api_hash = user.config.api_hash
         session_str = str(config.TG_USER_SESSION_DIR / real_phone)
-        client = TelegramClient(session_str    , self.api_id, self.api_hash, proxy=proxy) 
+        client = TelegramClient(session_str , self.api_id, self.api_hash, proxy=proxy) 
         try:
             if self.password == "no" or self.password == "":
                 await client.start(real_phone,  code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone)) 
+                await client.disconnect()
             else:
                 await client.start(real_phone,  password=self.password, code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone))
+                await client.disconnect()
         except Exception as e:
             print(f"登录失败 {str(e)}")
             return False
@@ -267,8 +279,6 @@ class TGSpider(AndroidSpider):
             self.api_hash = api_hash
             if not api_id or api_hash:
                 return None
-            
-
             self.login(api_id, api_hash)
 
     def check_dev(self):

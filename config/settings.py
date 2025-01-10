@@ -69,7 +69,7 @@ class DevelopmentConfig(BaseConfig):
     TG_USER_SESSION_DIR= Path("/home/liupeitao/tgsessions")
     TG_VERIFICATION_CODE_URL="http://192.168.9.29:7002/api/v1/Task/Telegram/varification"
     SPIDER_WEB_GMAIL_VERIFY_URL = "http://localhost:7001/api/v1/Task/gamil/varyfication"
-    LAMDA_HOST = "192.168.9.54"
+    LAMDA_HOST = "192.168.9.6"
 
 class HomeConfig(BaseConfig):
     basic_user_dir = Path("assets/broswer_data/00000000000")
