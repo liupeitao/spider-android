@@ -51,14 +51,11 @@ async def register_dev( item: App = App(), mgdb_client:AsyncIOMotorClient=Depend
         if len(str(res.data['api_id'])) < 6:
             raise Exception(f"注册失败, {res}")
         meta_data = {
-            "registed" :True,
-            "session_ok":False,
-            "password":"",
             "session_name": item.countrycode + item.phone,
         }
         meta_data.update(res.data)
         user_config = ConfigModel(**meta_data)
-        user = UserModel(phone=item.countrycode+item.phone, registed=True, session_ok=False, api_hash=res.data['api_hash'], api_id=res.data['api_id'], config=user_config)
+        user = UserModel(phone=item.countrycode+item.phone, category="sync",  registed=True, session_ok=False, api_hash=res.data['api_hash'], api_id=res.data['api_id'], config=user_config)
         try:
             await coll.insert_one(
                 user.dict()
@@ -109,14 +106,11 @@ async def mock_register_dev(item:App, mdgb_client:AsyncIOMotorClient):
         if len(str(res.data['api_id'])) < 6:
             raise Exception(f"注册失败, {res}")
         meta_data = {
-            "registed" :True,
-            "session_ok":False,
-            "password":"",
             "session_name": item.countrycode + item.phone,
         }
         meta_data.update(res.data)
         user_config = ConfigModel(**meta_data)
-        user = UserModel(phone=item.countrycode+item.phone, registed=True, session_ok=False, api_hash=res.data['api_hash'], api_id=res.data['api_id'], config=user_config)
+        user = UserModel(phone=item.countrycode+item.phone, category="sync", registed=True, session_ok=False, api_hash=res.data['api_hash'], api_id=res.data['api_id'], config=user_config)
         try:
             await coll.insert_one(
                 user.dict()

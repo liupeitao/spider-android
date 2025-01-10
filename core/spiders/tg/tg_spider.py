@@ -79,9 +79,15 @@ class TGSpider(AndroidSpider):
                 #         raise Exception("获取验证码超时")
                 # return verification_code
         else:
-            return redis_client.get(
-                f"""{self.app.app}:code:{self.app.countrycode+self.app.phone}"""
-            )
+            c =  0
+            while True:
+                verification_code = redis_client.get(f"""{self.app.app}:code:{self.app.countrycode+self.app.phone}""")
+                if verification_code:
+                    return verification_code
+                time.sleep(1)
+                c+=1
+                if c > 100:
+                    raise Exception("获取验证码超时")
     def scroll_to_bottom(self,reverse=False):
         for i in range(3):
             A = Point(x=300, y=200)

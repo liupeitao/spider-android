@@ -11,11 +11,7 @@ class Channel(BaseModel):
     name: str
 
 class ConfigModel(BaseModel):
-    api_id: int = 0
-    api_hash: str = ""
-    phone: str = ""
     session_name: str = ""
-    second_password: str = ""
     chats_dir: str = "chats"
     memeber_dir: str = "members"
     media_dir: str = "media"
@@ -24,7 +20,6 @@ class ConfigModel(BaseModel):
     limit: int = 1000
     dialog_path: str = "dialogs"
     max_size: str = "1M"
-    password: str = ""
 
 
 class UserModel(BaseModel):
@@ -34,6 +29,7 @@ class UserModel(BaseModel):
     password: str = ""
     session_ok: bool = False  # 是否有了会话
     registed: bool = False  #  是否注册开发者。
+    category: Literal['sync', 'yanghao'] = "sync"  #
     config: ConfigModel
 
 class AppStartUrl(Enum):
