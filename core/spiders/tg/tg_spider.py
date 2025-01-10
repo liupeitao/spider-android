@@ -248,8 +248,8 @@ class TGSpider(AndroidSpider):
         self.proxy_port = user.config.proxy_port
         proxy = (SOCKS5, self.proxy_host, self.proxy_port)
         real_phone = self.countrycode + self.phone
-        self.api_id = user.config.api_id
-        self.api_hash = user.config.api_hash
+        self.api_id = user.api_id
+        self.api_hash = user.api_hash
         session_str = str(config.TG_USER_SESSION_DIR / real_phone)
         client = TelegramClient(session_str , self.api_id, self.api_hash, proxy=proxy) 
         try:

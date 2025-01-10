@@ -153,9 +153,17 @@ async def gather(item: App, mgdb_client:AsyncIOMotorClient=Depends(get_mongo)):
         dev_response = await  mock_register_dev(item, mgdb_client)
         if not dev_response.success:
             return dev_response
-        # 第三步：登录session
+        # 第三步：登录session,已经成功了， 调用qctg即可
         session_response = await mock_login_ssession(item, mgdb_client)
-        return session_response
+        if not session_response.success:
+            return session_response
+
+
+         
+    
+
+
+        #
         
     except Exception as e:
         return ReturnModel(success=False, msg=f"获取session失败: {str(e)}")
