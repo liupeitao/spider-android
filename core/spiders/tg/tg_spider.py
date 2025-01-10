@@ -29,21 +29,6 @@ from telethon import TelegramClient
 redis_client = redis.from_url(config.REDIS_VERIFICATION_URL,  decode_responses=True)
 
 
-def get_varifycation_from_remote(countryode, phone):
-    # #TODO 从远程获取验证码
-    # code = input("请输入验证码")
-    # return code
-    resp = requests.post(
-        config.TG_VERIFICATION_CODE_URL, 
-        json={
-            "phone":phone,
-            "countrycode":countryode
-        }
-    ).json()
-    if not resp['code']:
-        raise Exception("没有提取到验证码")
-    print("登录验证码 ", resp['code'])
-    return resp['code']  
 
 
 
@@ -53,6 +38,15 @@ class TGSpider(AndroidSpider):
         self.passwd = ""
         self.password = self.passwd
 
+    def get_varifycation_from_remote(self, countryode, phone):
+        # #TODO 从远程获取验证码
+        time.sleep(10)
+        resp = self.get_develop_signup_code()
+        if not  resp['varify']['code']:
+            raise Exception("没有提取到验证码")
+        print("登录验证码 ", resp['varify']['code'])
+        return resp['varify']['code']
+    
     def request_varify_code(self) -> str:
         # #TODO 如果发送到邮箱， 否则是短信。。。
         if self.d(textContains="mail").exists() and config.TG_MAIL_LOGIN_SURPORT:
@@ -185,16 +179,13 @@ class TGSpider(AndroidSpider):
                     ret_text = self.d(textContains="to").get_text()
                 elif self.d(textContains="your").exists():
                     ret_text = self.d(textContains="your").get_text()
-                print(f"失败。 检测到不是输入验证码页面 原因:{ret_text}")
-                print("即将退出")
-                return
+                raise Exception(f"失败。 检测到不是输入验证码页面{ret_text}")
             print("等待20s")
             for i in range(1,20):
                 print(i, end=' ')
             code = self.request_varify_code()
             if not code_input.exists():
-                print("没有输入验证码的窗口")
-                return
+                raise Exception("没有找到验证码输入框")
             code_input.set_text(code)
             print(f"输入的验证码 {code}")
             time.sleep(2)
@@ -204,12 +195,11 @@ class TGSpider(AndroidSpider):
             else:
                 self.d(text="ALLOW").click()
             print("登录成功")
-            return
         except Exception as e:
             #TODO 异常: UiSelector[TEXT=Start Messaging] 后续处理
-            print(f"异常: {str(e)}")
-        finally:
-            return None
+            raise Exception(f"登录失败 {str(e)}")
+        else:
+            return True
 
     def get_develop_signup_code(self):
         def open_tg_chat(phone="42777"):
@@ -258,14 +248,13 @@ class TGSpider(AndroidSpider):
         client = TelegramClient(session_str , self.api_id, self.api_hash, proxy=proxy) 
         try:
             if self.password == "no" or self.password == "":
-                await client.start(real_phone,  code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone)) 
+                await client.start(real_phone,  code_callback=lambda: self.get_varifycation_from_remote(self.countrycode, self.phone)) 
                 await client.disconnect()
             else:
-                await client.start(real_phone,  password=self.password, code_callback=lambda: get_varifycation_from_remote(self.countrycode, self.phone))
+                await client.start(real_phone,  password=self.password, code_callback=lambda: self.get_varifycation_from_remote(self.countrycode, self.phone))
                 await client.disconnect()
         except Exception as e:
-            print(f"登录失败 {str(e)}")
-            return False
+            raise Exception(f"登录失败 {str(e)}")
         else:
             print("登录成功")
             return True

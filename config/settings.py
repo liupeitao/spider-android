@@ -38,7 +38,7 @@ class BaseConfig:
     REMOTE_SERVER = "http://localhost" 
     TG_MAIL_LOGIN_SURPORT=True 
     TG_USER_SESSION_DIR= Path("/home/liupeitao/tgsessions")
-    TG_VERIFICATION_CODE_URL="http://192.168.9.31:7002/api/v1/Task/Telegram/varification"
+    TG_VERIFICATION_CODE_URL="http://192.168.9.29:7002/api/v1/Task/Telegram/varification"
     SPIDER_WEB_GMAIL_VERIFY_URL = "http://localhost:7001/api/v1/Task/gamil/varyfication"
     LAMDA_HOST = "192.168.9.8"
     DEFAULT_PROXY_HOST = "localhost"

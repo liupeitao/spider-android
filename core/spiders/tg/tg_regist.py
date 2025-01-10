@@ -166,5 +166,4 @@ async def run(phone, countrycode)-> dict:
             res = await _run(playwright, phone=phone, countrycode=countrycode)
             return res
     except Exception as e:
-        print(f"注册失败{e}")
-        return {"reason": str(e)}
+        raise Exception(f"注册失败{e}")
