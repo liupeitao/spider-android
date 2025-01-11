@@ -37,7 +37,7 @@ class BaseConfig:
     MONGO_DB = "spider"
     REMOTE_SERVER = "http://localhost" 
     TG_MAIL_LOGIN_SURPORT=True 
-    TG_USER_SESSION_DIR= Path("/home/liupeitao/tgsessions")
+    TG_USER_SESSION_DIR= Path.home()/"tgsessions"
     TG_VERIFICATION_CODE_URL="http://192.168.9.29:7002/api/v1/Task/Telegram/varification"
     SPIDER_WEB_GMAIL_VERIFY_URL = "http://localhost:7001/api/v1/Task/gamil/varyfication"
     LAMDA_HOST = "192.168.9.8"
@@ -67,8 +67,9 @@ class LocalConfig(BaseConfig):
     RUN_TG_URL= "http://localhost:7003/tg" # 用于运行指定tg 用户的url
 
     TG_MAIL_LOGIN_SURPORT=True 
-    TG_USER_SESSION_DIR= Path("/home/liupeitao/tgsessions")
+    TG_USER_SESSION_DIR= Path.home()/"tgsessions"
     TG_VERIFICATION_CODE_URL="http://192.168.9.29:7002/api/v1/Task/Telegram/varification"
+    IMG_DIR = Path.home()/"static"
     SPIDER_WEB_GMAIL_VERIFY_URL = "http://localhost:7001/api/v1/Task/gamil/varyfication"
     LAMDA_HOST = "192.168.9.2"
 
@@ -77,7 +78,9 @@ class RemoteConfig(BaseConfig):
     basic_user_dir = Path("assets/broswer_data/00000000000")
     broswer_data_dir = Path("assets/broswer_data")
     REMOTE_PROXY = "http://192.168.9.22"
+    IMG_DIR = Path.home()/"static"
 
+    TG_USER_SESSION_DIR= Path.home()/"tgsessions"
     # # Postgresql
     PG_HOST = "localhost"
     PG_PORT = 5432
@@ -107,3 +110,5 @@ def init_config(env: str = "home") -> BaseConfig:
 env = os.environ.get("qcapp", "dev")
 
 config = init_config(env)
+if not config.IMAGE_DIR.exists():
+    config.IMAGE_DIR.mkdir(exist_ok=True)

@@ -231,7 +231,7 @@ class TGSpider(AndroidSpider):
         try:
             open_tg_chat()
             self.scroll_to_bottom()
-            pathes = get_last_varifycation_shot(img_dir=Path("/home/liupeitao/projects/spider-android/static"))
+            pathes = get_last_varifycation_shot(img_dir=config.IMG_DIR)
             ress = []
             for  path in  pathes:
                 res = extract_varifycation(path)
