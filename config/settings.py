@@ -46,7 +46,7 @@ class BaseConfig:
     REDIS_VERIFICATION_URL = "redis://:@192.168.9.25:6379/13"
 
 #: 开发环境
-class DevelopmentConfig(BaseConfig):
+class LocalConfig(BaseConfig):
     basic_user_dir = Path("assets/broswer_data/00000000000")
     broswer_data_dir = Path("assets/broswer_data")
     REMOTE_PROXY = "http://localhost"
@@ -64,6 +64,7 @@ class DevelopmentConfig(BaseConfig):
     MONGO_DB = "spider"
     MONGO_URL = "mongodb://root:root123456@192.168.9.37:27017/admin"
     REMOTE_SERVER = "http://localhost"
+    RUN_TG_URL= "http://localhost:7003/tg" # 用于运行指定tg 用户的url
 
     TG_MAIL_LOGIN_SURPORT=True 
     TG_USER_SESSION_DIR= Path("/home/liupeitao/tgsessions")
@@ -71,33 +72,8 @@ class DevelopmentConfig(BaseConfig):
     SPIDER_WEB_GMAIL_VERIFY_URL = "http://localhost:7001/api/v1/Task/gamil/varyfication"
     LAMDA_HOST = "192.168.9.6"
 
-class HomeConfig(BaseConfig):
-    basic_user_dir = Path("assets/broswer_data/00000000000")
-    broswer_data_dir = Path("assets/broswer_data")
-    REMOTE_PROXY = "http://localhost"
-
-    # # Postgresql
-    PG_HOST = "localhost"
-    PG_PORT = 5432
-    PG_DB = "postgres"
-    PG_USER = "admin"
-    PG_PASSWORD = "root123456"
-    PG_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DB}"
-    PG_MIN_CONNECTION_COUNT = 3
-    PG_MAX_CONNECTION_COUNT = 10
-
-    REDISDB_IP_PORTS = "localhost:6379"
-    REDISDB_USER_PASS = "root123456"
-    REDISDB_DB = 0  # 0-6 测试库  8-15 正式库
-    REDISDB_URL = f"redis://:{REDISDB_USER_PASS}@{REDISDB_IP_PORTS}/{REDISDB_DB}"
-
-    MONGO_DB = "spider"
-    MONGO_URL = "mongodb://root:root123456@localhost:27017/admin"
-    REMOTE_SERVER = "http://localhost"
-
-
 #: 生产环境
-class ProductionConfig(BaseConfig):
+class RemoteConfig(BaseConfig):
     basic_user_dir = Path("assets/broswer_data/00000000000")
     broswer_data_dir = Path("assets/broswer_data")
     REMOTE_PROXY = "http://192.168.9.22"
@@ -108,7 +84,7 @@ class ProductionConfig(BaseConfig):
     PG_DB = "postgres"
     PG_USER = "admin"
     PG_PASSWORD = "root123456"
-
+    RUN_TG_URL= "http://localhost:7003/tg" # 用于运行指定tg 用户的url
     REDISDB_IP_PORTS = "192.168.9.21:6379"
     REDISDB_USER_PASS = "root123456"
     REDISDB_DB = 0  # 0-6 测试库  8-15 正式库
@@ -122,13 +98,10 @@ class ProductionConfig(BaseConfig):
 def init_config(env: str = "home") -> BaseConfig:
     if env == "dev":
         logger.info("加载开发环境配置")
-        return DevelopmentConfig()
-    elif env == "home":
-        logger.info("加载Home环境配置")
-        return HomeConfig()
+        return LocalConfig()
     else:
         logger.info("加在生产环墫配置")
-        return DevelopmentConfig()
+        return LocalConfig()
 
 
 env = os.environ.get("qcapp", "dev")

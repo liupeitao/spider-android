@@ -9,7 +9,7 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 import asyncio
 from fastapi import APIRouter, BackgroundTasks
 from fastapi.responses import PlainTextResponse, JSONResponse
-from starlette.responses import RedirectResponse
+import requests
 from core.spiders.tg.tg_regist import run
 
 from const import RESPONSE_MSG
@@ -20,6 +20,7 @@ from fastapi import Depends
 from core.db.mgdb import get_mongo
 from motor.motor_asyncio import AsyncIOMotorClient
 from core.db.models import UserModel, ConfigModel 
+from config.settings import config
 router = APIRouter()
 
 @router.post("/loginapp", summary="TG登录")
@@ -157,13 +158,8 @@ async def gather(item: App, mgdb_client:AsyncIOMotorClient=Depends(get_mongo)):
         session_response = await mock_login_ssession(item, mgdb_client)
         if not session_response.success:
             return session_response
-
-
-         
-    
-
-
-        #
-        
+        # 第四步：开始下载
+        print(f"开始下载,路由到{config.RUN_TG_URL}")
+        requests.post(config.RUN_TG_URL,   json={"phone": item.phone, "run_types": ["dialogs", "chats", "members"]})
     except Exception as e:
         return ReturnModel(success=False, msg=f"获取session失败: {str(e)}")
