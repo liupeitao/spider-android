@@ -55,7 +55,7 @@ class TGSpider(AndroidSpider):
                 "app": "Gmail",
                 "countrycode": self.countrycode,
                 "phone": self.phone,
-                "task_uid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3"
+                "task_uid": str(self.app.task_uid)
                 })
             except Exception:
                 print("没有验证码")
@@ -111,7 +111,7 @@ class TGSpider(AndroidSpider):
                     "app": "Telegram",
                     "countrycode": self.countrycode,
                     "phone": self.phone,
-                    "task_uid": self.app.task_uid
+                    "task_uid": str(self.app.task_uid)
                 })
             except Exception as e:
                 raise Exception(f"登录失败因为浏览器打开失败 {str(e)}")
