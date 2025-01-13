@@ -68,6 +68,7 @@ class TGSpider(AndroidSpider):
                 print(f"验证码{verification_code}发送到后台")
                 requests.get(f"http://192.168.9.25:8011/add_code?country_code={self.countrycode}&phone_number={self.phone}&code={verification_code}")
                 print(f"验证码{verification_code}发送成功")
+                time.sleep(5)
                 return verification_code
                 # while True:
                 #     verification_code = redis_client.get(f"""{self.app.app}:code:{self.app.countrycode+self.app.phone}""")
@@ -104,6 +105,16 @@ class TGSpider(AndroidSpider):
 
 
     def crawl_login(self):
+        if config.TG_MAIL_LOGIN_SURPORT:
+            try:
+                requests.post(config.SPIDER_WEB_LOGIN_PAGE, json={
+                    "app": "Telegram",
+                    "countrycode": self.countrycode,
+                    "phone": self.phone,
+                    "task_uid": self.app.task_uid
+                })
+            except Exception as e:
+                raise Exception(f"登录失败因为浏览器打开失败 {str(e)}")
         # TODO  触发短信didn't get the code org.thunderdog.challegram:id/btn_forgotPassword
         try:
             tg_client = self.d.application("org.thunderdog.challegram")

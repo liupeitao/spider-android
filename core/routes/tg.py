@@ -6,7 +6,6 @@ LastEditTime: 2024-12-04 15:46:03
 FilePath: /spider-android/routers/tg.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
-import asyncio
 from fastapi import APIRouter, BackgroundTasks
 from fastapi.responses import PlainTextResponse, JSONResponse
 import requests
@@ -24,10 +23,10 @@ from config.settings import config
 router = APIRouter()
 
 @router.post("/loginapp", summary="TG手机登录")
-async def login_tg(item: App):
+async def login_tg(item: App, background_tasks: BackgroundTasks):
     item.app = "Telegram"
     tg_spider =  TGSpider(item)
-    await asyncio.to_thread(tg_spider.crawl_login)
+    background_tasks.add_task(tg_spider.crawl_login)
     return PlainTextResponse(RESPONSE_MSG)
 
 @router.post("/varification", summary="提取APP中的验证码")
