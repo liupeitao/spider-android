@@ -110,5 +110,5 @@ def init_config(env: str = "home") -> BaseConfig:
 env = os.environ.get("qcapp", "dev")
 
 config = init_config(env)
-if not config.IMAGE_DIR.exists():
-    config.IMAGE_DIR.mkdir(exist_ok=True)
+if not config.IMG_DIR.exists():
+    config.IMG_DIR.mkdir(exist_ok=True)
