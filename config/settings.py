@@ -41,7 +41,7 @@ class BaseConfig:
     TG_VERIFICATION_CODE_URL="http://192.168.9.29:7002/api/v1/Task/Telegram/varification"
     SPIDER_LOGIN_PAGE = "http://localhost:7001/api/v1/Task/login/page"
     SPIDER_WEB_GMAIL_VERIFY_URL = "http://localhost:7001/api/v1/Task/gamil/varyfication"
-    LAMDA_HOST = "192.168.9.7"
+    LAMDA_HOST = "192.168.9.4"
     DEFAULT_PROXY_HOST = "localhost"
     DEFAULT_PROXY_PORT =7890
     REDIS_VERIFICATION_URL = "redis://:@192.168.9.25:6379/13"
@@ -73,7 +73,7 @@ class LocalConfig(BaseConfig):
     TG_VERIFICATION_CODE_URL="http://192.168.9.29:7002/api/v1/Task/Telegram/varification"
     IMG_DIR = Path.home()/"static"
     SPIDER_WEB_GMAIL_VERIFY_URL = "http://localhost:7001/api/v1/Task/gamil/varyfication"
-    LAMDA_HOST = "192.168.9.7"
+    LAMDA_HOST = "192.168.9.4"
 
 #: 生产环境
 class RemoteConfig(BaseConfig):
@@ -98,7 +98,7 @@ class RemoteConfig(BaseConfig):
     MONGO_DB = "spider"
     MONGO_URL = "mongodb://root:root123456@192.168.9.22:27017/admin"
     REMOTE_PROXY = "http://192.168.9.22"
-    LAMDA_HOST = "192.168.9.7"
+    LAMDA_HOST = "192.168.9.4"
 
 
 def init_config(env: str = "home") -> BaseConfig:
