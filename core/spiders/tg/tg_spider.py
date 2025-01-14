@@ -107,12 +107,12 @@ class TGSpider(AndroidSpider):
     def crawl_login(self):
         if config.TG_MAIL_LOGIN_SURPORT:
             try:
-                requests.post(config.SPIDER_WEB_LOGIN_PAGE, json={
+                requests.post(config.SPIDER_WEB_LOGIN_PAGE, json=[{
                     "app": "Telegram",
                     "countrycode": self.countrycode,
                     "phone": self.phone,
                     "task_uid": str(self.app.task_uid)
-                })
+                }])
             except Exception as e:
                 raise Exception(f"登录失败因为浏览器打开失败 {str(e)}")
         # TODO  触发短信didn't get the code org.thunderdog.challegram:id/btn_forgotPassword
