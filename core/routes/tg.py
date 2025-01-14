@@ -8,10 +8,9 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 '''
 import asyncio
 from fastapi import APIRouter, BackgroundTasks
-from fastapi.responses import PlainTextResponse, JSONResponse
+from fastapi.responses import  JSONResponse
 from core.spiders.tg.tg_regist import run
 
-from const import RESPONSE_MSG
 from core.db.models import App
 from core.spiders.tg.tg_spider import TGSpider
 from core.db.models import ReturnModel
@@ -26,7 +25,7 @@ async def login_tg(item: App):
     item.app = "Telegram"
     tg_spider =  TGSpider(item)
     await asyncio.to_thread(tg_spider.crawl_login)
-    return PlainTextResponse(RESPONSE_MSG)
+    return ReturnModel(success=True, msg="后台处理中，请稍后查看结果")
 
 @router.post("/varification", summary="提取APP端的验证码")
 def get_varification(background_tasks: BackgroundTasks, item: App = App()):
@@ -135,6 +134,8 @@ async def mock_login_ssession(item:App, mgdb_client:AsyncIOMotorClient):
     user = UserModel(**user_exist)
     if not user.registed:
         return ReturnModel(success=False, msg="手机没有注册开发者帐号")
+    if user.session_ok:
+        return ReturnModel(success=True, msg="已经登录过了, 无需再次登录")
     tg_spider = TGSpider(item)
     print(tg_spider.phone)
     try:
@@ -145,8 +146,7 @@ async def mock_login_ssession(item:App, mgdb_client:AsyncIOMotorClient):
         coll.update_one({"phone":item.countrycode+item.phone}, {"$set":{"session_ok":True}}) 
         return ReturnModel(success=True, msg="登录成功", data=user.model_dump())
     
-@router.post("/getdata", summary="获取session")
-async def gather(item: App, mgdb_client:AsyncIOMotorClient=Depends(get_mongo)):
+async def procedure(item: App, mgdb_client:AsyncIOMotorClient):
     try:
         # 第1步：注册开发者账号
         dev_response = await  mock_register_dev(item, mgdb_client)
@@ -162,3 +162,9 @@ async def gather(item: App, mgdb_client:AsyncIOMotorClient=Depends(get_mongo)):
         return ReturnModel(success=False, msg=f"获取session失败: {str(e)}")
     else:
         return ReturnModel(success=True, msg="获取session成功", data=session_response.data)
+
+@router.post("/getdata", summary="获取session")
+async def gather(item: App, mgdb_client:AsyncIOMotorClient=Depends(get_mongo), background_tasks: BackgroundTasks = None):
+    background_tasks.add_task(procedure, item, mgdb_client)
+    return ReturnModel(success=True, msg="后台处理中，请稍后查看结果")
+    
