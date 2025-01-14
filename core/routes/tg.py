@@ -9,6 +9,7 @@ Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查�
 import asyncio
 from fastapi import APIRouter, BackgroundTasks
 from fastapi.responses import  JSONResponse
+import requests
 from core.spiders.tg.tg_regist import run
 
 from core.db.models import App
@@ -18,6 +19,7 @@ from fastapi import Depends
 from core.db.mgdb import get_mongo
 from motor.motor_asyncio import AsyncIOMotorClient
 from core.db.models import UserModel, ConfigModel 
+from config.settings import config
 router = APIRouter()
 
 @router.post("/loginapp", summary="TG登录")
@@ -158,6 +160,13 @@ async def procedure(item: App, mgdb_client:AsyncIOMotorClient):
             raise Exception(session_response.msg)
         # TODO: 第3步， 调用qctg接口， 它会 利用session获取数据
         # 第3步， 调用qctg接口， 它会 利用session获取数据
+        print(f"给后台发送爬取请求{config.RUN_TG_URL}")
+        response = requests.post(
+                f"{config.RUN_TG_URL}",
+                json={"phone": item.countrycode+item.phone, "run_types": ["dialogs", "chats", "members"]},
+                timeout=300
+        )
+        print("后台爬取中")
     except Exception as e:
         return ReturnModel(success=False, msg=f"获取session失败: {str(e)}")
     else:

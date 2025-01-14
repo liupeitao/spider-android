@@ -39,6 +39,8 @@ class BaseConfig:
     TG_MAIL_LOGIN_SURPORT=True 
     TG_USER_SESSION_DIR= Path.home()/"tgsessions"
     TG_VERIFICATION_CODE_URL="http://localhost:7002/api/v1/Task/Telegram/varification"
+    RUN_TG_URL= "http://localhost:7003/tg"
+
     SPIDER_LOGIN_PAGE = "http://localhost:7001/api/v1/Task/login/page"
     SPIDER_WEB_GMAIL_VERIFY_URL = "http://localhost:7001/api/v1/Task/gamil/varyfication"
     LAMDA_HOST = "192.168.9.4"
@@ -66,7 +68,7 @@ class LocalConfig(BaseConfig):
     MONGO_URL = "mongodb://root:root123456@192.168.9.37:27017/admin"
     REMOTE_SERVER = "http://localhost"
     RUN_TG_URL= "http://localhost:7003/tg" # 用于运行指定tg 用户的url
-
+    
     TG_MAIL_LOGIN_SURPORT=True 
     TG_USER_SESSION_DIR= Path.home()/"tgsessions"
     SPIDER_WEB_LOGIN_PAGE = "http://localhost:7001/api/v1/Task/login/page"
