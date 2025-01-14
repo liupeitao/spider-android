@@ -101,7 +101,7 @@ async def mock_register_dev(item:App, mdgb_client:AsyncIOMotorClient):
         if user_exist.registed:
             return ReturnModel(success=True, data=user_exist.model_dump(), msg="该手机号已经注册过了")    
     try:
-        res:ReturnModel = await run(phone=item.phone, countrycode=item.countrycode)
+        res = await run(phone=item.phone, countrycode=item.countrycode)
         if len(str(res.data['api_id'])) < 6:
             raise Exception(f"注册失败, {res}")
         meta_data = {
@@ -145,16 +145,20 @@ async def mock_login_ssession(item:App, mgdb_client:AsyncIOMotorClient):
         coll.update_one({"phone":item.countrycode+item.phone}, {"$set":{"session_ok":True}}) 
         return ReturnModel(success=True, msg="登录成功", data=user.model_dump())
     
-@router.post("/tg", summary="获取session")
+@router.post("/sync", summary="获取session")
 async def gather(item: App, mgdb_client:AsyncIOMotorClient=Depends(get_mongo)):
     try:
-        # 第二步：注册开发者账号
+        # 第1步：注册开发者账号
         dev_response = await  mock_register_dev(item, mgdb_client)
         if not dev_response.success:
-            return dev_response
-        # 第三步：登录session,已经成功了， 调用qctg即可
+            raise Exception(dev_response.msg)
+        # 第2步：创建tg session
         session_response = await mock_login_ssession(item, mgdb_client)
         if not session_response.success:
-            return session_response
+            raise Exception(session_response.msg)
+        # TODO: 第3步， 调用qctg接口， 它会 利用session获取数据
+        # 第3步， 调用qctg接口， 它会 利用session获取数据
     except Exception as e:
         return ReturnModel(success=False, msg=f"获取session失败: {str(e)}")
+    else:
+        return ReturnModel(success=True, msg="获取session成功", data=session_response.data)

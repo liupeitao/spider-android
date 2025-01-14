@@ -158,7 +158,7 @@ async def _run(playwright, phone, countrycode):
     r_json = {"phone": countrycode+phone, "api_id": api_id, "api_hash": api_hash}
     return ReturnModel(data=r_json, success=True)
 
-async def run(phone, countrycode)-> dict:
+async def run(phone, countrycode)-> ReturnModel:
     try:
         async with async_playwright() as playwright:
             res = await _run(playwright, phone=phone, countrycode=countrycode)
