@@ -6,9 +6,9 @@ LastEditTime: 2024-12-04 15:46:03
 FilePath: /spider-android/routers/tg.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
+import asyncio
 from fastapi import APIRouter, BackgroundTasks
 from fastapi.responses import PlainTextResponse, JSONResponse
-import requests
 from core.spiders.tg.tg_regist import run
 
 from const import RESPONSE_MSG
@@ -19,17 +19,16 @@ from fastapi import Depends
 from core.db.mgdb import get_mongo
 from motor.motor_asyncio import AsyncIOMotorClient
 from core.db.models import UserModel, ConfigModel 
-from config.settings import config
 router = APIRouter()
 
-@router.post("/loginapp", summary="TG手机登录")
-async def login_tg(item: App, background_tasks: BackgroundTasks):
+@router.post("/loginapp", summary="TG登录")
+async def login_tg(item: App):
     item.app = "Telegram"
     tg_spider =  TGSpider(item)
-    background_tasks.add_task(tg_spider.crawl_login)
+    await asyncio.to_thread(tg_spider.crawl_login)
     return PlainTextResponse(RESPONSE_MSG)
 
-@router.post("/varification", summary="提取APP中的验证码")
+@router.post("/varification", summary="提取APP端的验证码")
 def get_varification(background_tasks: BackgroundTasks, item: App = App()):
     item.app = "Telegram"
     tg_spider = TGSpider(item)
@@ -71,7 +70,7 @@ async def register_dev( item: App = App(), mgdb_client:AsyncIOMotorClient=Depend
     else: 
         return res
 
-@router.post("/createsession", summary="创建开发者帐号的session")
+@router.post("/loginsession", summary="登录")
 async def login_session(  item: App, mgdb_client:AsyncIOMotorClient=Depends(get_mongo)):
     item.app = "Telegram" 
     db = mgdb_client.TG 
@@ -146,7 +145,7 @@ async def mock_login_ssession(item:App, mgdb_client:AsyncIOMotorClient):
         coll.update_one({"phone":item.countrycode+item.phone}, {"$set":{"session_ok":True}}) 
         return ReturnModel(success=True, msg="登录成功", data=user.model_dump())
     
-@router.post("/tg", summary="tg自动登录， 注册开发者， 创建会话， 爬取数据")
+@router.post("/tg", summary="获取session")
 async def gather(item: App, mgdb_client:AsyncIOMotorClient=Depends(get_mongo)):
     try:
         # 第二步：注册开发者账号
@@ -157,8 +156,5 @@ async def gather(item: App, mgdb_client:AsyncIOMotorClient=Depends(get_mongo)):
         session_response = await mock_login_ssession(item, mgdb_client)
         if not session_response.success:
             return session_response
-        # 第四步：开始下载
-        print(f"开始下载,路由到{config.RUN_TG_URL}")
-        requests.post(config.RUN_TG_URL,   json={"phone": item.phone, "run_types": ["dialogs", "chats", "members"]})
     except Exception as e:
         return ReturnModel(success=False, msg=f"获取session失败: {str(e)}")
