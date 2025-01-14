@@ -145,7 +145,7 @@ async def mock_login_ssession(item:App, mgdb_client:AsyncIOMotorClient):
         coll.update_one({"phone":item.countrycode+item.phone}, {"$set":{"session_ok":True}}) 
         return ReturnModel(success=True, msg="登录成功", data=user.model_dump())
     
-@router.post("/sync", summary="获取session")
+@router.post("/getdata", summary="获取session")
 async def gather(item: App, mgdb_client:AsyncIOMotorClient=Depends(get_mongo)):
     try:
         # 第1步：注册开发者账号
