@@ -38,7 +38,7 @@ class BaseConfig:
     REMOTE_SERVER = "http://localhost" 
     TG_MAIL_LOGIN_SURPORT=True 
     TG_USER_SESSION_DIR= Path.home()/"tgsessions"
-    TG_VERIFICATION_CODE_URL="http://192.168.9.29:7002/api/v1/Task/Telegram/varification"
+    TG_VERIFICATION_CODE_URL="http://localhost:7002/api/v1/Task/Telegram/varification"
     SPIDER_LOGIN_PAGE = "http://localhost:7001/api/v1/Task/login/page"
     SPIDER_WEB_GMAIL_VERIFY_URL = "http://localhost:7001/api/v1/Task/gamil/varyfication"
     LAMDA_HOST = "192.168.9.4"
@@ -70,7 +70,7 @@ class LocalConfig(BaseConfig):
     TG_MAIL_LOGIN_SURPORT=True 
     TG_USER_SESSION_DIR= Path.home()/"tgsessions"
     SPIDER_WEB_LOGIN_PAGE = "http://localhost:7001/api/v1/Task/login/page"
-    TG_VERIFICATION_CODE_URL="http://192.168.9.29:7002/api/v1/Task/Telegram/varification"
+    TG_VERIFICATION_CODE_URL="http://localhost:7002/api/v1/Task/Telegram/varification"
     IMG_DIR = Path.home()/"static"
     SPIDER_WEB_GMAIL_VERIFY_URL = "http://localhost:7001/api/v1/Task/gamil/varyfication"
     LAMDA_HOST = "192.168.9.4"
@@ -79,7 +79,7 @@ class LocalConfig(BaseConfig):
 class RemoteConfig(BaseConfig):
     basic_user_dir = Path("assets/broswer_data/00000000000")
     broswer_data_dir = Path("assets/broswer_data")
-    REMOTE_PROXY = "http://192.168.9.22"
+    REMOTE_PROXY = "http://192.168.9.37"
     IMG_DIR = Path.home()/"static"
 
     TG_USER_SESSION_DIR= Path.home()/"tgsessions"
@@ -90,14 +90,14 @@ class RemoteConfig(BaseConfig):
     PG_USER = "admin"
     PG_PASSWORD = "root123456"
     RUN_TG_URL= "http://localhost:7003/tg" # 用于运行指定tg 用户的url
-    REDISDB_IP_PORTS = "192.168.9.21:6379"
+    REDISDB_IP_PORTS = "192.168.9.37:6379"
     REDISDB_USER_PASS = "root123456"
     REDISDB_DB = 0  # 0-6 测试库  8-15 正式库
     REDISDB_URL = f"redis://:{REDISDB_USER_PASS}@{REDISDB_IP_PORTS}/{REDISDB_DB}"
 
     MONGO_DB = "spider"
-    MONGO_URL = "mongodb://root:root123456@192.168.9.22:27017/admin"
-    REMOTE_PROXY = "http://192.168.9.22"
+    MONGO_URL = "mongodb://root:root123456@192.168.9.37:27017/admin"
+    REMOTE_PROXY = "http://192.168.9.37"
     LAMDA_HOST = "192.168.9.4"
 
 
