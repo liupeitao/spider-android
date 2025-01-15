@@ -76,6 +76,7 @@ class LocalConfig(BaseConfig):
     IMG_DIR = Path.home()/"static"
     SPIDER_WEB_GMAIL_VERIFY_URL = "http://localhost:7001/api/v1/Task/gamil/varyfication"
     LAMDA_HOST = "192.168.9.4"
+    REDIS_VERIFICATION_URL = "redis://:@192.168.9.25:6379/13"
 
 #: 生产环境
 class RemoteConfig(BaseConfig):
@@ -101,6 +102,7 @@ class RemoteConfig(BaseConfig):
     MONGO_URL = "mongodb://root:root123456@192.168.9.37:27017/admin"
     REMOTE_PROXY = "http://192.168.9.37"
     LAMDA_HOST = "192.168.9.4"
+    REDIS_VERIFICATION_URL = "redis://:@192.168.9.25:6379/13"
 
 
 def init_config(env: str = "home") -> BaseConfig:

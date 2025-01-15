@@ -8,8 +8,6 @@ FilePath: /lamda/android/tg/tgx.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 """
 
-# intent.setAction("android.intent.action.VIEW");
-# intent.setData(android.net.Uri.parse("tg://resolve?phone=" + phoneNumber));
 import datetime
 from pathlib import Path
 import time
@@ -29,9 +27,6 @@ from telethon import TelegramClient
 redis_client = redis.from_url(config.REDIS_VERIFICATION_URL,  decode_responses=True)
 
 
-
-
-
 class TGSpider(AndroidSpider):
     def __init__(self, app: App = App(app="Telegram"), device: DeviceModel=DeviceModel(ip=config.LAMDA_HOST, dtype="android")):
         super().__init__(app, device=device)
@@ -47,9 +42,11 @@ class TGSpider(AndroidSpider):
         print("登录验证码 ", resp['varify']['code'])
         return resp['varify']['code']
     
-    def request_varify_code(self) -> str:
+    def request_varify_code(self,  ) -> str:
         # #TODO 如果发送到邮箱， 否则是短信。。。
-        if self.d(textContains="mail").exists() and config.TG_MAIL_LOGIN_SURPORT:
+        # if self.d(textContains="mail").exists() and config.TG_MAIL_LOGIN_SURPORT:
+        # 从gmail获取验证码， 然后发送到后台， 然后从redis中获取验证码, 这里不应该要影响后续的逻辑
+        def send_verify():
             try:
                 res = requests.post(config.SPIDER_WEB_GMAIL_VERIFY_URL, json={
                 "app": "Gmail",
@@ -57,30 +54,20 @@ class TGSpider(AndroidSpider):
                 "phone": self.phone,
                 "task_uid": str(self.app.task_uid)
                 })
-            except Exception:
-                print("没有验证码")
-                return
-            else:
                 verification_code = res.json()[0].split(":")[-1].strip()
                 #FIXME  这里是测试代码
                 if not verification_code:
-                    raise Exception("没有验证码")
+                    return
                 print(f"验证码{verification_code}发送到后台")
+                #FIXME  这里的路径
                 requests.get(f"http://192.168.9.25:8011/add_code?country_code={self.countrycode}&phone_number={self.phone}&code={verification_code}")
                 print(f"验证码{verification_code}发送成功")
-                time.sleep(5)
-                return verification_code
-                # while True:
-                #     verification_code = redis_client.get(f"""{self.app.app}:code:{self.app.countrycode+self.app.phone}""")
-                #     if verification_code:
-                #         break 
-                #     time.sleep(1)
-                #     c+=1
-                #     if c > 100:
-                #         raise Exception("获取验证码超时")
-                # return verification_code
-        else:
-            c =  0
+            except Exception:
+                print("没有验证码")
+                return
+        
+        def acquire_code():
+            c = 0
             while True:
                 verification_code = redis_client.get(f"""{self.app.app}:code:{self.app.countrycode+self.app.phone}""")
                 if verification_code:
@@ -88,7 +75,10 @@ class TGSpider(AndroidSpider):
                 time.sleep(1)
                 c+=1
                 if c > 100:
-                    raise Exception("获取验证码超时")
+                    raise Exception("没有获取到验证码")
+        send_verify()
+        return acquire_code()
+
     def scroll_to_bottom(self,reverse=False):
         for i in range(3):
             A = Point(x=300, y=200)
