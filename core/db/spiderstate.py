@@ -57,18 +57,18 @@ def send_log(item: LogModel, group):
                 indent=4,
             )
         )
-    # aiohttp_session.post(
-    #     config.LOGGER_URL,
-    #     json={
-    #         "taskuid": str(item.app.task_uid),
-    #         "app": item.app.app,
-    #         "group": group,
-    #         "state": state,
-    #         "progress": 1,
-    #         "create_time": item.create_time,
-    #         "error": item.msg,
-    #     },
-    # )
+    aiohttp_session.post(
+        config.LOGGER_URL,
+        json={
+            "taskuid": str(item.app.task_uid),
+            "app": item.app.app,
+            "group": group,
+            "state": state,
+            "progress": 1,
+            "create_time": item.create_time,
+            "error": item.msg,
+        },
+    )
 
 
 class State:
