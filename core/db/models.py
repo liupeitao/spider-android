@@ -117,7 +117,7 @@ class CrawlerInfoModel(BaseModel):
 
 class StateEnum(Enum):
     PENDING = "等待中"
-    STARTING = "启动中"
+    STARTING = "执行中"
     RUNNING = "运行中"
     LAUNCH_BROWSER = "打开浏览器"
     CLOSING_BROWSER = "关闭浏览器"
@@ -142,7 +142,29 @@ class ScreenShotModel(BaseModel):
 class SpiderModel(App):
     pid: int
 
-
+FUNCTION_REPRESENT = {
+    "chats": "聊天",
+    "dialogs": "会话",
+    "cart": "购物车",
+    "order": "订单",
+    "self": "个人信息",
+    "friends": "好友",
+    "follow": "关注",
+    "fans": "粉丝",
+    "intercept_urls": "请求接口",
+    "intercept_urls_page": "请求许多接口",
+    "history_dache": "打车历史记录",
+    "history_jiaotong": "交通历史记录",
+    "history_buxing": "步行历史记录",
+    "history_search": "搜索历史记录",
+    "finish": "任务执行完成",
+    "start": "任务开始执行",
+    "error": "执行错误",
+    "dev": "注册开发者",
+    "login": "登录",
+    "session": "获取会话",
+    "verify": "登录验证码",
+}
 class LogModel(BaseModel, arbitrary_types_allowed=True):
     app: App
     func: Callable

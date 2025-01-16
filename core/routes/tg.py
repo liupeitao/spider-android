@@ -33,7 +33,7 @@ async def login_tg(item: App):
 def get_varification(background_tasks: BackgroundTasks, item: App = App()):
     item.app = "Telegram"
     tg_spider = TGSpider(item)
-    r = tg_spider.get_develop_signup_code()
+    r = tg_spider.crawl_verify()
     return JSONResponse(r)
 
 @router.post("/registerdev", summary="注册开发者帐号")
@@ -85,7 +85,7 @@ async def login_session(  item: App, mgdb_client:AsyncIOMotorClient=Depends(get_
     tg_spider = TGSpider(item)
     print(tg_spider.phone)
     try:
-        await tg_spider.login(user=user)
+        await tg_spider.crawl_session(user=user)
     except Exception as e:
         return ReturnModel(success=False, msg=str(e))
     else:
@@ -141,7 +141,7 @@ async def mock_login_ssession(item:App, mgdb_client:AsyncIOMotorClient):
     tg_spider = TGSpider(item)
     print(tg_spider.phone)
     try:
-        await tg_spider.login(user=user)
+        await tg_spider.crawl_session(user=user)
     except Exception as e:
         return ReturnModel(success=False, msg=str(e))
     else:

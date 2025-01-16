@@ -1,0 +1,49 @@
+{
+    "taskuid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3",
+    "app": "Telegram",
+    "group": "登录",
+    "state": "失败",
+    "progress": 1,
+    "create_time": "2025-01-16 10:06:14.612534",
+    "error": "|错误| => 登录失败因为浏览器打开失败 HTTPConnectionPool(host='localhost', port=7001): Max retries exceeded with url: /api/v1/Task/login/page (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7aa54eafb9d0>: Failed to establish a new connection: [Errno 111] Connection refused'))"
+}{
+    "taskuid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3",
+    "app": "Telegram",
+    "group": "登录",
+    "state": "失败",
+    "progress": 1,
+    "create_time": "2025-01-16 10:07:22.531481",
+    "error": "|错误| => 浏览器打开失败 HTTPConnectionPool(host='localhost', port=7001): Max retries exceeded with url: /api/v1/Task/login/page (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7e9861effb50>: Failed to establish a new connection: [Errno 111] Connection refused'))"
+}{
+    "taskuid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3",
+    "app": "Telegram",
+    "group": "登录",
+    "state": "失败",
+    "progress": 1,
+    "create_time": "2025-01-16 10:08:15.218899",
+    "error": "|错误| => 登录失败 没有获取到验证码"
+}{
+    "taskuid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3",
+    "app": "Telegram",
+    "group": "登录:启动中",
+    "state": "成功",
+    "progress": 1,
+    "create_time": "2025-01-16 10:12:14.278481",
+    "error": null
+}{
+    "taskuid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3",
+    "app": "Telegram",
+    "group": "登录",
+    "state": "失败",
+    "progress": 1,
+    "create_time": "2025-01-16 10:12:14.278481",
+    "error": "|错误| => 登录失败 没有获取到验证码"
+}{
+    "taskuid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3",
+    "app": "Telegram",
+    "group": "登录:启动中",
+    "state": "成功",
+    "progress": 1,
+    "create_time": "2025-01-16 10:21:19.762240",
+    "error": null
+}

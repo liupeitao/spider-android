@@ -19,9 +19,10 @@ import requests
 from lamda.client import GrantType, Point
 from config import config
 from core.androidspider import AndroidSpider
-from core.db.models import App, DeviceModel
+from core.db.models import App, DeviceModel, StateEnum
 from core.db.models import UserModel
 
+from core.tools.deco import deco_log_state
 from core.tools.ocr import extract_varifycation
 from telethon import TelegramClient
 redis_client = redis.from_url(config.REDIS_VERIFICATION_URL,  decode_responses=True)
@@ -33,16 +34,32 @@ class TGSpider(AndroidSpider):
         self.passwd = ""
         self.password = self.passwd
 
+    def scroll_to_bottom(self,reverse=False):
+        for i in range(3):
+            A = Point(x=300, y=200)
+            B = Point(x=300, y=1000)
+            if reverse:
+                self.d.swipe(A, B)
+            self.d.swipe(B, A)
+            if f := self.d(resourceId="org.thunderdog.challegram:id/btn_scroll"):
+                try:
+                    f.click()
+                    break
+                except Exception:
+                    continue
+
     def get_varifycation_from_remote(self, countryode, phone):
         # #TODO 从远程获取验证码
         time.sleep(10)
-        resp = self.get_develop_signup_code()
+        resp = self.crawl_dev()
         if not  resp['varify']['code']:
             raise Exception("没有提取到验证码")
         print("登录验证码 ", resp['varify']['code'])
         return resp['varify']['code']
     
-    def request_varify_code(self,  ) -> str:
+    # 用于登录
+    # @deco_log_state(state=StateEnum.STARTING)
+    def crawl_login_code(self,  ) -> str:
         # #TODO 如果发送到邮箱， 否则是短信。。。
         # if self.d(textContains="mail").exists() and config.TG_MAIL_LOGIN_SURPORT:
         # 从gmail获取验证码， 然后发送到后台， 然后从redis中获取验证码, 这里不应该要影响后续的逻辑
@@ -78,22 +95,70 @@ class TGSpider(AndroidSpider):
                     raise Exception("没有获取到验证码")
         send_verify()
         return acquire_code()
+    
+    #用于 dev帐号和session
+    @deco_log_state(state=StateEnum.STARTING)
+    def crawl_verify(self):
+        def open_tg_chat(phone="42777"):
+            self.d.start_activity(action="android.intent.action.VIEW", data=f"https://t.me/+{phone}")
+            time.sleep(2)
+            self.d.click(Point(x=690, y=448))        
+        def get_last_varifycation_shot(img_dir: Path)-> list[Path]:
+            pathes = []
+            ff = self.d(className="android.view.View")
+            eles = [
+                x
+                for x in ff.info_of_all_instances()
+                if x.visibleBounds.left == 0
+                and x.visibleBounds.right == 720
+                and x.visibleBounds.bottom - x.visibleBounds.top > 300
+                and x.visibleBounds.bottom - x.visibleBounds.top < 1000
+            ]         
+            for index, ele in enumerate(eles):
+                img_path = img_dir / f"{str(index)}.png"
+                self.d.screenshot(quality=60, bound=ele.bounds).save(img_path) 
+                pathes.append(img_path) 
+            return pathes
+        try:
+            open_tg_chat()
+            self.scroll_to_bottom()
+            pathes = get_last_varifycation_shot(img_dir=config.IMG_DIR)
+            ress = []
+            for  path in  pathes:
+                res = extract_varifycation(path)
+                if res['varify']['code'] or res['web_varify']['code']:
+                    ress.append(res)
+                    print(res['varify']['code'], res['web_varify']['code'])
+            return ress[-1]
+        except Exception as e:
+            raise Exception(f"提取验证码失败: {str(e)}")
 
-    def scroll_to_bottom(self,reverse=False):
-        for i in range(3):
-            A = Point(x=300, y=200)
-            B = Point(x=300, y=1000)
-            if reverse:
-                self.d.swipe(A, B)
-            self.d.swipe(B, A)
-            if f := self.d(resourceId="org.thunderdog.challegram:id/btn_scroll"):
-                try:
-                    f.click()
-                    break
-                except Exception:
-                    continue
+    # -获取会话
+    @deco_log_state(state=StateEnum.STARTING)
+    async def crawl_session(self, user:UserModel):
+        self.proxy_host = user.config.proxy_host
+        self.proxy_port = user.config.proxy_port
+        proxy = (SOCKS5, self.proxy_host, self.proxy_port)
+        real_phone = self.countrycode + self.phone
+        self.api_id = user.api_id
+        self.api_hash = user.api_hash
+        session_str = str(config.TG_USER_SESSION_DIR / real_phone)
+        client = TelegramClient(session_str , self.api_id, self.api_hash, proxy=proxy) 
+        try:
+            if self.password == "no" or self.password == "":
+                await client.start(real_phone,  code_callback=lambda: self.get_varifycation_from_remote(self.countrycode, self.phone)) 
+                await client.disconnect()
+            else:
+                await client.start(real_phone,  password=self.password, code_callback=lambda: self.get_varifycation_from_remote(self.countrycode, self.phone))
+                await client.disconnect()
+        except Exception as e:
+            raise Exception(f"登录失败 {str(e)}")
+        else:
+            print("登录成功")
+            return True
+  
 
-
+    @deco_log_state(state=StateEnum.STARTING)
     def crawl_login(self):
         if config.TG_MAIL_LOGIN_SURPORT:
             try:
@@ -104,7 +169,7 @@ class TGSpider(AndroidSpider):
                     "task_uid": str(self.app.task_uid)
                 }])
             except Exception as e:
-                raise Exception(f"登录失败因为浏览器打开失败 {str(e)}")
+                raise Exception(f"浏览器打开失败 {str(e)}")
         # TODO  触发短信didn't get the code org.thunderdog.challegram:id/btn_forgotPassword
         try:
             tg_client = self.d.application("org.thunderdog.challegram")
@@ -190,7 +255,7 @@ class TGSpider(AndroidSpider):
             print("等待20s")
             for i in range(1,20):
                 print(i, end=' ')
-            code = self.request_varify_code()
+            code = self.crawl_login_code()
             if not code_input.exists():
                 raise Exception("没有找到验证码输入框")
             code_input.set_text(code)
@@ -208,64 +273,6 @@ class TGSpider(AndroidSpider):
         else:
             return True
 
-    def get_develop_signup_code(self):
-        def open_tg_chat(phone="42777"):
-            self.d.start_activity(action="android.intent.action.VIEW", data=f"https://t.me/+{phone}")
-            time.sleep(2)
-            self.d.click(Point(x=690, y=448))        
-        def get_last_varifycation_shot(img_dir: Path)-> list[Path]:
-            pathes = []
-            ff = self.d(className="android.view.View")
-            eles = [
-                x
-                for x in ff.info_of_all_instances()
-                if x.visibleBounds.left == 0
-                and x.visibleBounds.right == 720
-                and x.visibleBounds.bottom - x.visibleBounds.top > 300
-                and x.visibleBounds.bottom - x.visibleBounds.top < 1000
-            ]         
-            for index, ele in enumerate(eles):
-                img_path = img_dir / f"{str(index)}.png"
-                self.d.screenshot(quality=60, bound=ele.bounds).save(img_path) 
-                pathes.append(img_path) 
-            return pathes
-        try:
-            open_tg_chat()
-            self.scroll_to_bottom()
-            pathes = get_last_varifycation_shot(img_dir=config.IMG_DIR)
-            ress = []
-            for  path in  pathes:
-                res = extract_varifycation(path)
-                if res['varify']['code'] or res['web_varify']['code']:
-                    ress.append(res)
-                    print(res['varify']['code'], res['web_varify']['code'])
-            return ress[-1]
-        except Exception as e:
-            print(f"失败没有登录{str(e)}")
-            return {}
-    
-    async def login(self, user:UserModel):
-        self.proxy_host = user.config.proxy_host
-        self.proxy_port = user.config.proxy_port
-        proxy = (SOCKS5, self.proxy_host, self.proxy_port)
-        real_phone = self.countrycode + self.phone
-        self.api_id = user.api_id
-        self.api_hash = user.api_hash
-        session_str = str(config.TG_USER_SESSION_DIR / real_phone)
-        client = TelegramClient(session_str , self.api_id, self.api_hash, proxy=proxy) 
-        try:
-            if self.password == "no" or self.password == "":
-                await client.start(real_phone,  code_callback=lambda: self.get_varifycation_from_remote(self.countrycode, self.phone)) 
-                await client.disconnect()
-            else:
-                await client.start(real_phone,  password=self.password, code_callback=lambda: self.get_varifycation_from_remote(self.countrycode, self.phone))
-                await client.disconnect()
-        except Exception as e:
-            raise Exception(f"登录失败 {str(e)}")
-        else:
-            print("登录成功")
-            return True
-  
 
     def check_session(self):
         session_path = config.TG_USER_SESSION_DIR  / (self.countrycode + self.phone)
@@ -275,7 +282,7 @@ class TGSpider(AndroidSpider):
             self.api_hash = api_hash
             if not api_id or api_hash:
                 return None
-            self.login(api_id, api_hash)
+            self.crawl_session(api_id, api_hash)
 
     def check_dev(self):
         return "", ""
