@@ -182,7 +182,7 @@ class FINISHED_STATE(State):
 
     def do(self, item: LogModel, *args, **kwargs):  #
         task_uid: UUID = item.app.task_uid
-        future: Future = kwargs.get("future", None)
+        future = kwargs.get("future", None)
         if future is not None:
             crawler_str = get_string_from_func(future.get_name())
         else:
@@ -212,7 +212,7 @@ class ERROR_STATE(State):
         group1 = f"{func_str}"
         if item.msg is None:
             item.msg = "未知错误"
-        item.msg  = f"|{self.state.value}| => " + item.msg 
+        item.msg  =  item.msg 
         # values = [task_uid, name, group, 0.0, item.msg, item.create_time]
         # pg_client.execute(error_sql, value=values)
         logger.info(f"{item.msg}{name}|{group}|{item.create_time}|{task_uid}")
