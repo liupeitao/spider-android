@@ -23,10 +23,11 @@ from config.settings import config
 router = APIRouter()
 
 @router.post("/loginapp", summary="TG登录")
-async def login_tg(item: App):
+async def login_tg(item: App, background_tasks: BackgroundTasks):
     item.app = "Telegram"
     tg_spider =  TGSpider(item)
-    await asyncio.to_thread(tg_spider.crawl_login)
+    # await asyncio.to_thread(tg_spider.crawl_login)
+    background_tasks.add_task(tg_spider.crawl_login)
     return ReturnModel(success=True, msg="后台处理中，请稍后查看结果")
 
 @router.post("/varification", summary="提取APP端的验证码")
