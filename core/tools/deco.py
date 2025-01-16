@@ -15,10 +15,7 @@ def deco_log_state(state: StateEnum):
 
             spider: Spider = args[0]
             log_item = LogModel(app=spider.app, func=func, state=state, spider=spider)
-            context = StateContext()
-            
-            context.set_state(state)
-            log_state(context, log_item, *args, **kwargs)
+            context = StateContext()            
             try:
                 result = await func(*args, **kwargs)
             except Exception as e:
@@ -28,6 +25,8 @@ def deco_log_state(state: StateEnum):
                 log_state(context, log_item, *args, **kwargs)
                 raise e
             else:
+                context.set_state(state)
+                log_state(context, log_item, *args, **kwargs)
                 return result
 
         @functools.wraps(func)
@@ -38,8 +37,6 @@ def deco_log_state(state: StateEnum):
             spider: Spider = args[0]
             log_item = LogModel(app=spider.app, func=func, state=state, spider=spider)
             context = StateContext()
-            context.set_state(state)
-            log_state(context, log_item, *args, **kwargs)
             try:
                 result = func(*args, **kwargs)
             except Exception as e:
