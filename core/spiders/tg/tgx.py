@@ -137,9 +137,8 @@ def run(phone):
                 ret_text = d(textContains="to").get_text()
             elif d(textContains="your").exists():
                 ret_text = d(textContains="your").get_text()
-            print(f"失败。 检测到不是输入验证码页面 原因:{ret_text}")
-            print("即将退出")
-            return
+            print(f"失败{ret_text}")
+            raise Exception(f"=>{ret_text}")
         code = wait_for_code()
         if not code_input.exists():
             print("没有输入验证码的窗口")

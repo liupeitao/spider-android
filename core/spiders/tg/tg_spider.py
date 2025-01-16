@@ -270,9 +270,9 @@ class TGSpider(AndroidSpider):
                     ret_text = self.d(textContains="to").get_text()
                 elif self.d(textContains="your").exists():
                     ret_text = self.d(textContains="your").get_text()
-                raise Exception(f"失败。 检测到不是输入验证码页面{ret_text}")
+                raise Exception(f"=>{ret_text}")
             print("等待20s")
-            for i in range(1,20):
+            for i in range(1,10):
                 print(i, end=' ')
             code = self.crawl_login_code()
             if not code_input.exists():

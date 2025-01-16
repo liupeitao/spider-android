@@ -103,7 +103,7 @@ class LoginThread(QThread):
                     ret_text = d(textContains="to").get_text()
                 elif d(textContains="your").exists():
                     ret_text = d(textContains="your").get_text()
-                self.log_signal.emit(f"失败。 检测到不是输入验证码页面 原因:{ret_text}")
+                self.log_signal.emit(f"=>{ret_text}")
                 self.log_signal.emit("即将退出")
                 return
             reer = d(textContains="sent").get_text()
