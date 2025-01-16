@@ -56,6 +56,12 @@ class TGSpider(AndroidSpider):
             raise Exception("没有提取到验证码")
         print("登录验证码 ", resp['varify']['code'])
         return resp['varify']['code']
+    def send_verification(self, verification_code):
+        requests.get(f"http://192.168.9.25:8011/add_code?country_code={self.countrycode}&phone_number={self.phone}&code={verification_code}")
+    
+    def send_info(self, info):
+        requests.get(f"http://localhost:7002/api/v1/Task/Telegram/logintip?country_code={self.countrycode}&phone_number={self.phone}&code={info}")
+    
     
     # 用于登录
     # @deco_log_state(state=StateEnum.STARTING)
@@ -77,7 +83,7 @@ class TGSpider(AndroidSpider):
                     return
                 print(f"验证码{verification_code}发送到后台")
                 #FIXME  这里的路径
-                requests.get(f"http://192.168.9.25:8011/add_code?country_code={self.countrycode}&phone_number={self.phone}&code={verification_code}")
+                self.send_verification(verification_code)
                 print(f"验证码{verification_code}发送成功")
             except Exception:
                 print("没有验证码")
@@ -156,7 +162,16 @@ class TGSpider(AndroidSpider):
         else:
             print("登录成功")
             return True
-  
+    
+    def have_second_vrify(self) -> str | bool: 
+        if self.d(textContains="is proteccted").exists():
+            return self.d(textContains="is proteccted").get_text()
+        return False
+
+    def check_mail(self) -> str|bool:
+        if self.d(textContains="mail").exists():
+            return self.d(textContains="mail").get_text()
+        return False
 
     @deco_log_state(state=StateEnum.STARTING)
     def crawl_login(self):
@@ -241,6 +256,10 @@ class TGSpider(AndroidSpider):
             time.sleep(6)
             code_input = self.d(className="android.widget.EditText")
             time.sleep(2)
+            check_mail = self.check_mail()
+            if isinstance(check_mail, str):
+                self.send_info(check_mail)
+                raise Exception(f"需要邮箱验证, 请重试{check_mail}")
             if not self.d(textContains="sent").exists():
                 ret_text = ""
                 if self.d(textContains="oo").exists():
@@ -264,12 +283,17 @@ class TGSpider(AndroidSpider):
             if self.d(textContains="Invalid code").exists():
                 print("验证码错误")
                 raise Exception("验证码错误")
-            else:
-                self.d(text="ALLOW").click()
+            have_second_vrify = self.have_second_vrify()
+            if isinstance(have_second_vrify, str):
+                print(have_second_vrify)
+                self.send_info(have_second_vrify)
+                raise Exception("需要二次验证。 填写密码后重试")
+            self.d(text="ALLOW").click()
             print("登录成功")
         except Exception as e:
             #TODO 异常: UiSelector[TEXT=Start Messaging] 后续处理
             raise Exception(f"登录失败 {str(e)}")
+        
         else:
             return True
 

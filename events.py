@@ -21,6 +21,7 @@ def create_start_app_handler(app: FastAPI, settings: BaseConfig) -> Coroutine:
             mg_pool = tg.create_task(connect_to_mongo(settings))
         app.state.pool = await pg_pool
         app.state.mongo = await mg_pool
+        app.state.key_db = {}
 
     app.state.process_pool = ProcessPoolExecutor()
     return start_app()

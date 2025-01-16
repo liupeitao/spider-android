@@ -7,7 +7,8 @@ FilePath: /spider-android/routers/tg.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
 import asyncio
-from fastapi import APIRouter, BackgroundTasks
+from typing import Optional
+from fastapi import APIRouter, BackgroundTasks, Request
 from fastapi.responses import  JSONResponse
 import requests
 from core.spiders.tg.tg_regist import run
@@ -20,6 +21,9 @@ from core.db.mgdb import get_mongo
 from motor.motor_asyncio import AsyncIOMotorClient
 from core.db.models import UserModel, ConfigModel 
 from config.settings import config
+from multiprocessing import Manager
+manager = Manager()
+w = manager.dict()
 router = APIRouter()
 
 @router.post("/loginapp", summary="TG登录")
@@ -29,6 +33,14 @@ async def login_tg(item: App, background_tasks: BackgroundTasks):
     # await asyncio.to_thread(tg_spider.crawl_login)
     background_tasks.add_task(tg_spider.crawl_login)
     return ReturnModel(success=True, msg="后台处理中，请稍后查看结果")
+
+@router.get("/logintip", summary="登录提示")
+def login_tip(phone_number: str, country_code:str,    code: Optional[str]=None ):
+    print( phone_number, country_code, code)
+    if code is not None:
+        w[country_code+phone_number] = code
+    else:
+        return w.get(country_code+phone_number, '')
 
 @router.post("/varification", summary="提取APP端的验证码")
 def get_varification(background_tasks: BackgroundTasks, item: App = App()):
