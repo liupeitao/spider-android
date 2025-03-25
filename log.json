@@ -46,4 +46,52 @@
     "progress": 1,
     "create_time": "2025-01-16 10:21:19.762240",
     "error": null
+}{
+    "taskuid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3",
+    "app": "Telegram",
+    "group": "登录",
+    "state": "失败",
+    "progress": 1,
+    "create_time": "2025-02-21 09:18:40.612915",
+    "error": "浏览器打开失败 HTTPConnectionPool(host='localhost', port=7001): Max retries exceeded with url: /api/v1/Task/login/page (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x74bc72367710>: Failed to establish a new connection: [Errno 111] Connection refused'))"
+}{
+    "taskuid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3",
+    "app": "Telegram",
+    "group": "登录",
+    "state": "失败",
+    "progress": 1,
+    "create_time": "2025-02-21 09:18:42.720002",
+    "error": "浏览器打开失败 HTTPConnectionPool(host='localhost', port=7001): Max retries exceeded with url: /api/v1/Task/login/page (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x750216abc850>: Failed to establish a new connection: [Errno 111] Connection refused'))"
+}{
+    "taskuid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3",
+    "app": "Telegram",
+    "group": "登录",
+    "state": "失败",
+    "progress": 1,
+    "create_time": "2025-02-21 09:19:26.425137",
+    "error": "登录失败 <_InactiveRpcError of RPC that terminated with:\n\tstatus = StatusCode.UNIMPLEMENTED\n\tdetails = \"Method not found!\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {created_time:\"2025-02-21T09:19:26.775864385+08:00\", grpc_status:12, grpc_message:\"Method not found!\"}\"\n>"
+}{
+    "taskuid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3",
+    "app": "Telegram",
+    "group": "登录",
+    "state": "失败",
+    "progress": 1,
+    "create_time": "2025-02-21 09:20:10.953171",
+    "error": "登录失败 <_InactiveRpcError of RPC that terminated with:\n\tstatus = StatusCode.UNIMPLEMENTED\n\tdetails = \"Method not found!\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {created_time:\"2025-02-21T09:20:11.018653915+08:00\", grpc_status:12, grpc_message:\"Method not found!\"}\"\n>"
+}{
+    "taskuid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3",
+    "app": "Telegram",
+    "group": "登录",
+    "state": "失败",
+    "progress": 1,
+    "create_time": "2025-02-21 09:20:36.254801",
+    "error": "登录失败 <_InactiveRpcError of RPC that terminated with:\n\tstatus = StatusCode.UNIMPLEMENTED\n\tdetails = \"Method not found!\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {grpc_message:\"Method not found!\", grpc_status:12, created_time:\"2025-02-21T09:20:36.433221126+08:00\"}\"\n>"
+}{
+    "taskuid": "2517d19b-5fea-4aaa-8b2a-d3964e61a1a3",
+    "app": "Telegram",
+    "group": "登录",
+    "state": "失败",
+    "progress": 1,
+    "create_time": "2025-02-21 09:22:44.948003",
+    "error": "登录失败 <_InactiveRpcError of RPC that terminated with:\n\tstatus = StatusCode.UNIMPLEMENTED\n\tdetails = \"Method not found!\"\n\tdebug_error_string = \"UNKNOWN:Error received from peer  {grpc_message:\"Method not found!\", grpc_status:12, created_time:\"2025-02-21T09:22:45.087709804+08:00\"}\"\n>"
 }
