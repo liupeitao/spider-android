@@ -2,39 +2,21 @@ import base64
 import datetime
 from contextlib import asynccontextmanager
 
-import asyncpg
 import uvicorn
-from asyncpg.pool import Pool
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from l.rediscli import get_redis_client
 
-PG_HOST = "124.220.6.43"
-PG_PORT = 5432
-PG_DB = "postgres"
-PG_USER = "admin"
-PG_PASSWORD = "root123456"
-PG_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DB}"
-PG_MIN_CONNECTION_COUNT = 3
-PG_MAX_CONNECTION_COUNT = 10
 
 
-async def connect_to_pg(app):
-    pool = await asyncpg.create_pool(
-        str(PG_URL),
-        min_size=PG_MIN_CONNECTION_COUNT,
-        max_size=PG_MAX_CONNECTION_COUNT,
-    )
-    if pool is None:
-        raise ConnectionError("Could not connect to PostgreSQL")
-    app.state.pool = pool
+
+
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await connect_to_pg(app)
     yield
     await app.state.pool.close()
 

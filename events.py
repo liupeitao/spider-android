@@ -26,7 +26,6 @@ def create_start_app_handler(app: FastAPI, settings: BaseConfig) -> Coroutine:
 def create_stop_app_handler(app: FastAPI) -> Coroutine:  # type: ignore
     @logger.catch
     async def stop_app() -> None:
-        await close_pg_connection(app)
         close_mongo_connection(app)
 
     asyncio.to_thread
