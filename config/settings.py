@@ -13,7 +13,6 @@ from pathlib import Path
 
 from loguru import logger
 
-
 class BaseConfig:
     app_name: str = "qcspider"
 
