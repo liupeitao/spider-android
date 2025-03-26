@@ -8,18 +8,14 @@ from loguru import logger
 
 from core.db.events import (
     close_mongo_connection,
-    close_pg_connection,
     connect_to_mongo,
-    connect_to_pg,
 )
 
 
 def create_start_app_handler(app: FastAPI, settings: BaseConfig) -> Coroutine:
     async def start_app() -> None:
         async with asyncio.TaskGroup() as tg:
-            pg_pool = tg.create_task(connect_to_pg(settings))
             mg_pool = tg.create_task(connect_to_mongo(settings))
-        app.state.pool = await pg_pool
         app.state.mongo = await mg_pool
         app.state.key_db = {}
 
